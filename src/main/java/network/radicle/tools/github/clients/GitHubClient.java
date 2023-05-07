@@ -10,7 +10,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import network.radicle.tools.github.Config;
-import network.radicle.tools.github.core.Issue;
+import network.radicle.tools.github.core.GitHubIssue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class GitHubClient implements IGitHubClient {
     @Inject ObjectMapper mapper;
     @Inject Config config;
 
-    public List<Issue> getIssues(int page) throws Exception {
+    public List<GitHubIssue> getIssues(int page) throws Exception {
         var url = String.join("/", List.of(Strings.nullToEmpty(config.getUrl()), "repos",
                 Strings.nullToEmpty(config.getOwner()), Strings.nullToEmpty(config.getRepo()), "issues"));
 

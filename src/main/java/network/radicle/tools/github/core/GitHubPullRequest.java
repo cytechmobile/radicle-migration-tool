@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PullRequest {
+public class GitHubPullRequest {
     @JsonProperty("url")
     public String url;
     @JsonProperty("html_url")

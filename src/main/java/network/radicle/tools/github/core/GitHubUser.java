@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class User {
+public class GitHubUser {
     @JsonProperty("login")
     public String login;
     @JsonProperty("id")

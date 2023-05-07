@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Milestone {
+public class GitHubMilestone {
     @JsonProperty("url")
     public String url;
     @JsonProperty("html_url")
@@ -27,7 +27,7 @@ public class Milestone {
     @JsonProperty("description")
     public String description;
     @JsonProperty("creator")
-    public User creator;
+    public GitHubUser creator;
     @JsonProperty("open_issues")
     public Integer openIssues;
     @JsonProperty("closed_issues")

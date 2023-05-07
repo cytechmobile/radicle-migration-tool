@@ -10,7 +10,7 @@ import java.util.List;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Issue {
+public class GitHubIssue {
     @JsonProperty("id")
     public Long id;
     @JsonProperty("node_id")
@@ -36,15 +36,15 @@ public class Issue {
     @JsonProperty("body")
     public String body;
     @JsonProperty("user")
-    public User user;
+    public GitHubUser user;
     @JsonProperty("labels")
-    public List<Label> labels;
+    public List<GitHubLabel> labels;
     @JsonProperty("assignee")
-    public User assignee;
+    public GitHubUser assignee;
     @JsonProperty("assignees")
-    public List<User> assignees;
+    public List<GitHubUser> assignees;
     @JsonProperty("milestone")
-    public Milestone milestone;
+    public GitHubMilestone milestone;
     @JsonProperty("locked")
     public Boolean locked;
     @JsonProperty("active_lock_reason")
@@ -52,7 +52,7 @@ public class Issue {
     @JsonProperty("comments")
     public Long comments;
     @JsonProperty("pull_request")
-    public PullRequest pullRequest;
+    public GitHubPullRequest pullRequest;
     @JsonProperty("closed_at")
     public Instant closedAt;
     @JsonProperty("created_at")
@@ -60,7 +60,7 @@ public class Issue {
     @JsonProperty("updated_at")
     public Instant updatedAt;
     @JsonProperty("closed_by")
-    public User closedBy;
+    public GitHubUser closedBy;
     @JsonProperty("author_association")
     public String authorAssociation;
     @JsonProperty("state_reason")
