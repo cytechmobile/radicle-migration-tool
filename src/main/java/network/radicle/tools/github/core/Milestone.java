@@ -3,7 +3,9 @@ package network.radicle.tools.github.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Milestone {
     @JsonProperty("url")
@@ -25,7 +27,7 @@ public class Milestone {
     @JsonProperty("description")
     public String description;
     @JsonProperty("creator")
-    public Creator creator;
+    public User creator;
     @JsonProperty("open_issues")
     public Integer openIssues;
     @JsonProperty("closed_issues")

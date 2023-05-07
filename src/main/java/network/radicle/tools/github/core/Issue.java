@@ -3,9 +3,12 @@ package network.radicle.tools.github.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+import java.time.Instant;
 import java.util.List;
 
+@RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Issue {
     @JsonProperty("id")
@@ -37,9 +40,9 @@ public class Issue {
     @JsonProperty("labels")
     public List<Label> labels;
     @JsonProperty("assignee")
-    public Assignee assignee;
+    public User assignee;
     @JsonProperty("assignees")
-    public List<Assignee> assignees;
+    public List<User> assignees;
     @JsonProperty("milestone")
     public Milestone milestone;
     @JsonProperty("locked")
@@ -51,13 +54,13 @@ public class Issue {
     @JsonProperty("pull_request")
     public PullRequest pullRequest;
     @JsonProperty("closed_at")
-    public Object closedAt;
+    public Instant closedAt;
     @JsonProperty("created_at")
-    public String createdAt;
+    public Instant createdAt;
     @JsonProperty("updated_at")
-    public String updatedAt;
+    public Instant updatedAt;
     @JsonProperty("closed_by")
-    public ClosedBy closedBy;
+    public User closedBy;
     @JsonProperty("author_association")
     public String authorAssociation;
     @JsonProperty("state_reason")
