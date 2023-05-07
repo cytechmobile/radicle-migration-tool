@@ -1,0 +1,27 @@
+# GitHub Actions Workflow created for testing the application
+name: Run Tests
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  runTests:
+    runs-on: ubuntu-latest
+    steps:
+      # Check out current repository
+      - name: checkout
+        uses: actions/checkout@v3
+
+      # Setup Java environment for the next steps
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      # Run tests and build the application
+      - name: build
+        working-directory: './'
+        run: |
+          ./mvnw verify
