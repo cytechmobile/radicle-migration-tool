@@ -11,41 +11,60 @@ import picocli.CommandLine;
 @CommandLine.Command
 public class Command implements Runnable {
     @CommandLine.Option(
-            names = {"-v", "--version"},
+            names = {"-gv", "--github-api-version"},
             defaultValue = "github.api.version",
             description = "The version of the GitHub REST API (e.g. 2022-11-28)")
-    String version;
+    String gVersion;
 
     @CommandLine.Option(
-            names = {"-u", "--url"},
+            names = {"-gu", "--github-api-url"},
             defaultValue = "github.api.url",
             description = "The base url of the GitHub REST API")
-    String url;
+    String gUrl;
 
     @CommandLine.Option(
-            names = {"-r", "--repo"},
+            names = {"-gr", "--github-repo"},
             required = true,
             defaultValue = "${GITHUB_REPO}",
             description = "The target GitHub repo")
-    String repo;
+    String gRepo;
 
     @CommandLine.Option(
-            names = {"-o", "--owner"},
+            names = {"-go", "--github-repo-owner"},
             required = true,
             defaultValue = "${GITHUB_OWNER}",
             description = "The owner of the target GitHub repo")
-    String owner;
+    String gOwner;
 
     @CommandLine.Option(
-            names = {"-t", "--token"},
+            names = {"-gt", "--github-token"},
             required = true,
             interactive = true,
             defaultValue = "${GITHUB_TOKEN}",
             description = "The GitHub authentication token")
-    String token;
+    String gToken;
 
     @ConfigProperty(name = "github.api.page-size")
-    int pageSize;
+    int gPageSize;
+
+    @CommandLine.Option(
+            names = {"-rv", "--radicle-api-version"},
+            defaultValue = "radicle.api.version",
+            description = "The version of the Radicle HTTP API (e.g. v1)")
+    String rVersion;
+
+    @CommandLine.Option(
+            names = {"-ru", "--radicle-api-url"},
+            defaultValue = "radicle.api.url",
+            description = "The base url of Radicle HTTP API")
+    String rUrl;
+
+    @CommandLine.Option(
+            names = {"-rp", "--radicle-project"},
+            required = true,
+            defaultValue = "${RADICLE_PROJECT}",
+            description = "The target Radicle project")
+    String rProject;
 
     @Inject MigrationService service;
     @Inject Config config;
@@ -55,12 +74,8 @@ public class Command implements Runnable {
     }
 
     private void loadConfiguration() {
-        config.setToken(token);
-        config.setUrl(url);
-        config.setRepo(repo);
-        config.setVersion(version);
-        config.setOwner(owner);
-        config.setPageSize(pageSize);
+        config.setGithub(new Config.GitHubConfig(gToken, gUrl, gVersion, gOwner, gRepo, gPageSize));
+        config.setRadicle(new Config.RadicleConfig(rUrl, rVersion, rProject));
     }
 
 }
