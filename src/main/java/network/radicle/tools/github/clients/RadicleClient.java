@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
 import network.radicle.tools.github.Config;
-import network.radicle.tools.github.handlers.ResponseHandler;
 import network.radicle.tools.github.core.radicle.Issue;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.core.radicle.actions.Action;
+import network.radicle.tools.github.handlers.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,15 +49,15 @@ public class RadicleClient implements IRadicleClient {
         logger.debug("Creating radicle issue: {}", url);
         try (var resp = client.target(url).request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))
-                .post(Entity.entity(issue, MediaType.APPLICATION_JSON))) {
+                .post(Entity.json(issue))) {
 
             var json = ResponseHandler.handleResponse(resp);
             var jsonNode = mapper.readTree(json);
             var success = jsonNode.get("success").asBoolean();
-            if (success) {
-                return jsonNode.get("id").asText();
+            if (!success) {
+                throw new BadRequestException(json);
             }
-            return null;
+            return jsonNode.get("id").asText();
         }
     }
 
@@ -72,7 +72,7 @@ public class RadicleClient implements IRadicleClient {
         try (var resp = client.target(url)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))
-                .method("PATCH", Entity.entity(action, MediaType.APPLICATION_JSON))) {
+                .method("PATCH", Entity.json(action))) {
 
             var json = ResponseHandler.handleResponse(resp);
             var jsonNode = mapper.readTree(json);
