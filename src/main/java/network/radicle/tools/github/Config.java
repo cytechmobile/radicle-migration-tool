@@ -46,15 +46,6 @@ public class Config {
                     '}';
         }
     }
-    public record RadicleConfig(String url, String version, String project) {
-        @Override
-        public String toString() {
-            return "RadicleConfig{" +
-                    "url='" + url + '\'' +
-                    ", version='" + version + '\'' +
-                    ", project='" + project + '\'' +
-                    '}';
-        }
-    }
+    public record RadicleConfig(String url, String version, String project) { }
 
 }
