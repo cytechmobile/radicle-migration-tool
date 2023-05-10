@@ -4,22 +4,23 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import network.radicle.tools.github.Config;
 import network.radicle.tools.github.services.MigrationService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import picocli.CommandLine;
 
 @Dependent
 @CommandLine.Command
 public class Command implements Runnable {
+    public static final int PAGE_SIZE = 100;
+
     @CommandLine.Option(
             names = {"-gv", "--github-api-version"},
-            defaultValue = "github.api.version",
-            description = "The version of the GitHub REST API (e.g. 2022-11-28)")
+            defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
+            description = "The version of the GitHub REST API (default 2022-11-28)")
     String gVersion;
 
     @CommandLine.Option(
             names = {"-gu", "--github-api-url"},
-            defaultValue = "github.api.url",
-            description = "The base url of the GitHub REST API")
+            defaultValue = "${GITHUB_API_URL:-https://api.github.com}",
+            description = "The base url of the GitHub REST API (default https://api.github.com)")
     String gUrl;
 
     @CommandLine.Option(
@@ -44,19 +45,16 @@ public class Command implements Runnable {
             description = "The GitHub authentication token")
     String gToken;
 
-    @ConfigProperty(name = "github.api.page-size")
-    int gPageSize;
-
     @CommandLine.Option(
             names = {"-rv", "--radicle-api-version"},
-            defaultValue = "radicle.api.version",
-            description = "The version of the Radicle HTTP API (e.g. v1)")
+            defaultValue = "${RADICLE_API_VERSION:-v1}",
+            description = "The version of the Radicle HTTP API (default v1)")
     String rVersion;
 
     @CommandLine.Option(
             names = {"-ru", "--radicle-api-url"},
-            defaultValue = "radicle.api.url",
-            description = "The base url of Radicle HTTP API")
+            defaultValue = "${RADICLE_API_URL:-http://localhost:8080/api}",
+            description = "The base url of Radicle HTTP API (default http://localhost:8080/api)")
     String rUrl;
 
     @CommandLine.Option(
@@ -74,7 +72,7 @@ public class Command implements Runnable {
     }
 
     private void loadConfiguration() {
-        config.setGithub(new Config.GitHubConfig(gToken, gUrl, gVersion, gOwner, gRepo, gPageSize));
+        config.setGithub(new Config.GitHubConfig(gToken, gUrl, gVersion, gOwner, gRepo, PAGE_SIZE));
         config.setRadicle(new Config.RadicleConfig(rUrl, rVersion, rProject));
     }
 
