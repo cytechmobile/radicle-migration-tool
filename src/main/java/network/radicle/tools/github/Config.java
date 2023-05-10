@@ -4,81 +4,57 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class Config {
-    private String token;
-    private String url;
-    private String version;
-    private String owner;
-    private String repo;
-    private int pageSize;
+    private GitHubConfig github;
+    private RadicleConfig radicle;
 
     public Config() {
     }
 
-    public Config(String token, String url, String version, String owner, String repo, int pageSize) {
-        this.token = token;
-        this.url = url;
-        this.version = version;
-        this.owner = owner;
-        this.repo = repo;
-        this.pageSize = pageSize;
+    public GitHubConfig getGithub() {
+        return github;
     }
 
-    public String getToken() {
-        return token;
+    public RadicleConfig getRadicle() {
+        return radicle;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setGithub(GitHubConfig github) {
+        this.github = github;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getRepo() {
-        return repo;
-    }
-
-    public void setRepo(String repo) {
-        this.repo = repo;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+    public void setRadicle(RadicleConfig radicle) {
+        this.radicle = radicle;
     }
 
     @Override
     public String toString() {
-        return "Config {" +
-                "url='" + url + '\'' +
-                ", version='" + version + '\'' +
-                ", owner='" + owner + '\'' +
-                ", repo='" + repo + '\'' +
+        return "Config{" +
+                "github=" + github +
+                ", radicle=" + radicle +
                 '}';
+    }
+
+    public record GitHubConfig(String token, String url, String version, String owner, String repo, int pageSize) {
+        @Override
+        public String toString() {
+            return "GitHubConfig{" +
+                    "url='" + url + '\'' +
+                    ", version='" + version + '\'' +
+                    ", owner='" + owner + '\'' +
+                    ", repo='" + repo + '\'' +
+                    ", pageSize=" + pageSize +
+                    '}';
+        }
+    }
+    public record RadicleConfig(String url, String version, String project) {
+        @Override
+        public String toString() {
+            return "RadicleConfig{" +
+                    "url='" + url + '\'' +
+                    ", version='" + version + '\'' +
+                    ", project='" + project + '\'' +
+                    '}';
+        }
     }
 
 }
