@@ -2,14 +2,12 @@ package network.radicle.tools.github.commands;
 
 import io.quarkus.runtime.Quarkus;
 import jakarta.enterprise.context.Dependent;
-import network.radicle.tools.github.providers.ApplicationPropertiesDefaultProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 @Dependent
-@CommandLine.Command(name = "issues", description = "Migrate GitHub issues",
-        defaultValueProvider = ApplicationPropertiesDefaultProvider.class)
+@CommandLine.Command(name = "issues", description = "Migrate GitHub issues")
 public class IssuesCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(IssuesCommand.class);
 
