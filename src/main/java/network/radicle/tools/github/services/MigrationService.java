@@ -19,6 +19,7 @@ import java.util.List;
 @ApplicationScoped
 public class MigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationService.class);
+    private static final String DATE_PATTERN_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Inject IGitHubClient github;
     @Inject IRadicleClient radicle;
@@ -49,21 +50,21 @@ public class MigrationService {
                         var radIssue = issue.toRadicle();
                         try {
                             var id = radicle.createIssue(session, radIssue);
-                            if (id != null) {
-                                // update issue's state
+                            // update issue's state
+                            if (!Issue.STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
                                 radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
+                            }
 
-                                // process issue's commends
-                                var commentsPage = 1;
-                                var hasMoreComments = true;
-                                while (hasMoreComments) {
-                                    var comments = github.getComments(issue.number, commentsPage);
-                                    for (var comment : comments) {
-                                        radicle.updateIssue(session, id, new CommentAction(comment.body));
-                                    }
-                                    hasMoreComments = config.getGithub().pageSize() == comments.size();
-                                    commentsPage++;
+                            // process issue's comments
+                            var commentsPage = 1;
+                            var hasMoreComments = true;
+                            while (hasMoreComments) {
+                                var comments = github.getComments(issue.number, commentsPage);
+                                for (var comment : comments) {
+                                    radicle.updateIssue(session, id, new CommentAction(comment.getBodyWithMeta()));
                                 }
+                                hasMoreComments = config.getGithub().pageSize() == comments.size();
+                                commentsPage++;
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);

@@ -31,6 +31,14 @@ public class Comment {
     @JsonProperty("author_association")
     public String authorAssociation;
 
+    public String getMeta() {
+        return "> github comment: commented on " + this.updatedAt.toString() + " by " + this.user.login;
+    }
+
+    public String getBodyWithMeta() {
+        return this.getMeta() + "\n\n" + this.body;
+    }
+
     @Override
     public String toString() {
         return "Comment{" +

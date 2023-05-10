@@ -14,6 +14,12 @@ import java.util.stream.Collectors;
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Issue {
+    public static final String STATE_OPEN = "open";
+    public static final String STATE_CLOSED = "closed";
+    public static final String STATE_COMPLETED = "completed";
+    public static final String STATE_SOLVED = "solved";
+    public static final String STATE_OTHER = "other";
+
     @JsonProperty("id")
     public Long id;
     @JsonProperty("node_id")
@@ -73,23 +79,31 @@ public class Issue {
         var issue = new network.radicle.tools.github.core.radicle.Issue();
 
         issue.title = this.title;
-        var githubMeta = String.join(" ", "> github #" + this.number,
-                "opened on", this.createdAt.toString(), "by", this.user.login);
-        issue.description = String.join("\n\n", githubMeta, Strings.nullToEmpty(this.body));
+        issue.description = getMeta() + "\n\n" +  Strings.nullToEmpty(this.body);
         issue.tags = this.labels != null ?
                 this.labels.stream().map(l -> l.name).collect(Collectors.toList()) :
                 List.of();
 
         var reason = "";
-        if ("open".equalsIgnoreCase(this.state)) {
+        if (STATE_OPEN.equalsIgnoreCase(this.state)) {
             reason = null;
         } else {
-            reason = "completed".equalsIgnoreCase(this.stateReason) ? "solved" : "other";
+            reason = STATE_COMPLETED.equalsIgnoreCase(this.stateReason) ? STATE_SOLVED : STATE_OTHER;
         }
         issue.state = new State(this.state, reason);
         issue.assignees = List.of();
 
         return issue;
+    }
+
+    public String getMeta() {
+        var meta = "> github issue: #" + this.number + " opened on " + this.createdAt.toString() +
+                " by " + this.user.login;
+        if (this.assignees != null) {
+            meta += " and assigned to " + this.assignees.stream().map(a -> a.login)
+                    .collect(Collectors.joining(", "));
+        }
+        return meta;
     }
 
     @Override
