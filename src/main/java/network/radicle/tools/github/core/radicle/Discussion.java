@@ -16,7 +16,7 @@ public class Discussion {
     @JsonProperty("body")
     public String body;
     @JsonProperty("reactions")
-    public List<Object> reactions;
+    public List<Reaction> reactions;
     @JsonProperty("timestamp")
     public String timestamp;
     @JsonProperty("replyTo")
