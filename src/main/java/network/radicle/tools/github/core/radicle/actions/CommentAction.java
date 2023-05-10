@@ -17,6 +17,9 @@ public class CommentAction extends ThreadAction {
         }});
     }
 
+    public CommentAction() {
+    }
+
     public CommentAction(String body) {
         this(body, null);
     }

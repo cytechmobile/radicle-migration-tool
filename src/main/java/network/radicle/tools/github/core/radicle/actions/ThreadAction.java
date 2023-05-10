@@ -17,6 +17,9 @@ public class ThreadAction extends Action {
         this.action = action;
     }
 
+    public ThreadAction() {
+    }
+
     @Override
     public String toString() {
         return "ThreadAction{" +
