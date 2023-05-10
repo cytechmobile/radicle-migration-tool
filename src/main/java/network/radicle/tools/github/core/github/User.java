@@ -1,5 +1,5 @@
 
-package network.radicle.tools.github.core;
+package network.radicle.tools.github.core.github;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GitHubUser {
+public class User {
     @JsonProperty("login")
     public String login;
     @JsonProperty("id")
@@ -45,4 +45,27 @@ public class GitHubUser {
     @JsonProperty("site_admin")
     public Boolean siteAdmin;
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "login='" + login + '\'' +
+                ", id=" + id +
+                ", nodeId='" + nodeId + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                ", gravatarId='" + gravatarId + '\'' +
+                ", url='" + url + '\'' +
+                ", htmlUrl='" + htmlUrl + '\'' +
+                ", followersUrl='" + followersUrl + '\'' +
+                ", followingUrl='" + followingUrl + '\'' +
+                ", gistsUrl='" + gistsUrl + '\'' +
+                ", starredUrl='" + starredUrl + '\'' +
+                ", subscriptionsUrl='" + subscriptionsUrl + '\'' +
+                ", organizationsUrl='" + organizationsUrl + '\'' +
+                ", reposUrl='" + reposUrl + '\'' +
+                ", eventsUrl='" + eventsUrl + '\'' +
+                ", receivedEventsUrl='" + receivedEventsUrl + '\'' +
+                ", type='" + type + '\'' +
+                ", siteAdmin=" + siteAdmin +
+                '}';
+    }
 }

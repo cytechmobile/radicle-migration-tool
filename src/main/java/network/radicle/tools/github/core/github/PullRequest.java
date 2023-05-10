@@ -1,5 +1,5 @@
 
-package network.radicle.tools.github.core;
+package network.radicle.tools.github.core.github;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GitHubPullRequest {
+public class PullRequest {
     @JsonProperty("url")
     public String url;
     @JsonProperty("html_url")
@@ -17,4 +17,13 @@ public class GitHubPullRequest {
     @JsonProperty("patch_url")
     public String patchUrl;
 
+    @Override
+    public String toString() {
+        return "PullRequest{" +
+                "url='" + url + '\'' +
+                ", htmlUrl='" + htmlUrl + '\'' +
+                ", diffUrl='" + diffUrl + '\'' +
+                ", patchUrl='" + patchUrl + '\'' +
+                '}';
+    }
 }
