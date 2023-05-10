@@ -1,4 +1,4 @@
-package network.radicle.tools.github.core;
+package network.radicle.tools.github.core.github;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,25 +24,25 @@ public class IssueTest {
     public void testSerializationOfSingleIssue() throws Exception {
         var issue = generateGitHubIssue();
         var json = MAPPER.writeValueAsString(issue);
-        var i = MAPPER.readValue(json, GitHubIssue.class);
+        var i = MAPPER.readValue(json, Issue.class);
 
-        assertThat(i).usingRecursiveComparison().isEqualTo(issue);
+        assertThat(i).isNotNull().usingRecursiveComparison().isEqualTo(issue);
     }
 
     @Test
     public void testSerializationOfManyIssues() {
-        List<GitHubIssue> issues = loadGitHubIssues();
+        List<Issue> issues = loadGitHubIssues();
         assertThat(issues.size()).isNotZero();
-        GitHubIssue issue = issues.get(0);
+        Issue issue = issues.get(0);
         assertThat(issue.title).isNotNull().isNotEmpty();
         assertThat(issue.createdAt).isNotNull();
     }
 
-    public static GitHubIssue generateGitHubIssue() {
+    public static Issue generateGitHubIssue() {
         try {
             var seed = System.currentTimeMillis();
-            var file = new File("src/test/resources/issue.json");
-            GitHubIssue issue = MAPPER.readValue(file, GitHubIssue.class);
+            var file = new File("src/test/resources/github/issue.json");
+            Issue issue = MAPPER.readValue(file, Issue.class);
             issue.id = issue.id + seed;
             issue.createdAt = Instant.now().minus(1, ChronoUnit.HOURS);
             issue.updatedAt = Instant.now();
@@ -53,9 +53,9 @@ public class IssueTest {
         }
     }
 
-    public static List<GitHubIssue> loadGitHubIssues() {
+    public static List<Issue> loadGitHubIssues() {
         try {
-            var file = new File("src/test/resources/issues.json");
+            var file = new File("src/test/resources/github/issues.json");
             return MAPPER.readValue(file, new TypeReference<>() { });
         } catch (Exception ex) {
             return List.of();

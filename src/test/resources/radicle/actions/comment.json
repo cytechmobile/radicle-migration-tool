@@ -1,0 +1,7 @@
+{
+  "type": "thread",
+  "action": {
+    "type": "comment",
+    "body": "This is first-level comment"
+  }
+}

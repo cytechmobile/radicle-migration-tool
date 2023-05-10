@@ -1,0 +1,26 @@
+{
+  "id": "81e68ffe7a0c11e2a3827816f5409a8e303e3505",
+  "author": {
+    "id": "did:key:z6Mkeyoeu6AZrxs79RcX5TUdBAhwxQNbfwXEXPQGvXJtVeHU"
+  },
+  "assignees": [],
+  "title": "Issue #2",
+  "state": {
+    "status": "open"
+  },
+  "discussion": [
+    {
+      "id": "43213ffe7a0c11e2a3827816f5409a8e303e5321",
+      "author": {
+        "id": "did:key:z6Mkeyoeu6AZrxs79RcX5TUdBAhwxQNbfwXEXPQGvXJtVeHU"
+      },
+      "body": "Change 'hello world' to 'hello everyone'",
+      "reactions": [],
+      "timestamp": "2019-08-18T14:38:40Z",
+      "replyTo": "fe7a0c11e2a3827816f5409a8e30fe7a0c11e2a382781"
+    }
+  ],
+  "tags": [
+    "bug"
+  ]
+}
