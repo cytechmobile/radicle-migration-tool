@@ -5,7 +5,7 @@ radicle-github-migrate
 
 This Command Line Interface (CLI) tool allows to migrate the issues from GitHub repository to your Radicle project.
 
-To use this tool, you can either download one of the pre-built binaries from the project's GitHub releases page, or you can build a binary from the source code.
+To use this tool, you can either download one of the pre-built binaries from the project's GitHub [releases](https://github.com/cytechmobile/radicle-github-migrate/releases), or you can build a binary from the source code.
 
 The target rad environment must have a version 0.8.0 rad Command Line Interface (CLI) tool installed and the HTTP daemon (radicle-httpd) up and running. Installation instructions for `rad` are available [here](https://github.com/radicle-dev/heartwood).
 
@@ -92,7 +92,7 @@ $ ./mvnw.cmd package -Pnative
 ```
 
 
-This will generate the JAR file in the `target` directory.
+This will generate the binary file in the `target` directory.
 
 ### Downloading pre-built binaries
 Pre-built binaries can be downloaded from the project's GitHub [releases page](https://github.com/cytechmobile/radicle-github-migrate/releases). Choose the appropriate release for your operating system and download the associated JAR or executable file.
