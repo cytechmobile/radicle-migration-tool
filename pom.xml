@@ -18,7 +18,7 @@
 
     <surefire-plugin.version>3.0.0</surefire-plugin.version>
     <checkstyle-plugin.version>3.2.2</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.10.0</checkstyle-tools.version>
+    <checkstyle-tools.version>10.11.0</checkstyle-tools.version>
 
     <skipTests>false</skipTests>
   </properties>
