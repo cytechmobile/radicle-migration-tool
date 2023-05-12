@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+# By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
+# With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
+concurrency:
+  group: Release-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  releaseJavaBinary:
+    name: Release Java Binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        run: |
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      - name: Build Java Executable
+        run: ./mvnw package
+
+      - name: Remove Old Draft Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/{owner}/{repo}/releases \
+             --jq '.[] | select(.draft == true) | .id' \
+             | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}  
+
+        # Create new release draft - which is not publicly visible and requires manual acceptance
+      - name: Create Draft Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mv ./target/radicle-github-migrate-${{ env.VERSION }}-runner.jar \
+             ./target/radicle-github-migrate-${{ env.VERSION }}.jar
+          
+          gh release create v${{ env.VERSION }} ./target/radicle-github-migrate-${{ env.VERSION }}.jar \
+            --draft \
+            --title "v${{ env.VERSION }}" \
+            --generate-notes
+
+  releaseNativeBinaries:
+    needs: releaseJavaBinary
+    name: Release Native Binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        shell: bash
+        run: |
+          MAVEN_COMMAND="$(if [ "$RUNNER_OS" == "Windows" ]; then echo "./mvnw.cmd"; else echo "./mvnw"; fi)"
+          VERSION=$(eval "$MAVEN_COMMAND help:evaluate -Dexpression=project.version -q -DforceStdout")
+          ASSET_SUFFIX="$(if [ "$RUNNER_OS" == "Windows" ]; then echo ".exe"; else echo ""; fi)"
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MAVEN_COMMAND=$MAVEN_COMMAND" >> $GITHUB_ENV
+          echo "ASSET_SUFFIX=$ASSET_SUFFIX" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      - name: Setup GraalVM
+        if: startsWith(matrix.os, 'macos-') || startsWith(matrix.os, 'windows-')
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          gds-token: ${{ secrets.GDS_TOKEN }}
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Native Executable
+        shell: bash
+        run: eval "${MAVEN_COMMAND} package -Pnative"
+
+      - name: Upload Native Executable To Draft Release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mv ./target/radicle-github-migrate-${{ env.VERSION }}-runner${{ env.ASSET_SUFFIX }} \
+             ./target/radicle-github-migrate-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }}
+          
+          gh release upload v${{ env.VERSION }} \
+              ./target/radicle-github-migrate-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }} \
+            --clobber
