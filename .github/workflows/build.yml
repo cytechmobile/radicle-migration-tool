@@ -1,5 +1,5 @@
 # GitHub Actions Workflow created for testing the application
-name: Run Tests
+name: Build
 
 on:
   workflow_dispatch:
