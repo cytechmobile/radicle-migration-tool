@@ -30,7 +30,6 @@ jobs:
         if: success() && github.actor == 'dependabot[bot]' && github.ref != 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           echo "found successful dependabot PR, merging it"
-          gh pr merge --merge    
+          gh pr merge --merge --admin    
