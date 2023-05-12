@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
   push:
 
+permissions:
+  pull-requests: write
+
 jobs:
   runTests:
     runs-on: ubuntu-latest
