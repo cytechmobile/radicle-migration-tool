@@ -32,7 +32,7 @@ public class Comment {
     public String authorAssociation;
 
     public String getMeta() {
-        return "> github comment: commented on " + this.updatedAt.toString() + " by " + this.user.login;
+        return "> github comment: commented on " + this.createdAt.toString() + " by " + this.user.login;
     }
 
     public String getBodyWithMeta() {
