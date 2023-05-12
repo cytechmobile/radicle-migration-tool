@@ -13,7 +13,7 @@ public class Command implements Runnable {
 
     @CommandLine.Option(
             names = {"-gv", "--github-api-version"},
-            defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
+                defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
             description = "The version of the GitHub REST API (default 2022-11-28)")
     String gVersion;
 
@@ -27,14 +27,14 @@ public class Command implements Runnable {
             names = {"-gr", "--github-repo"},
             required = true,
             defaultValue = "${GITHUB_REPO}",
-            description = "The target GitHub repo")
+            description = "The source GitHub repo")
     String gRepo;
 
     @CommandLine.Option(
             names = {"-go", "--github-repo-owner"},
             required = true,
             defaultValue = "${GITHUB_OWNER}",
-            description = "The owner of the target GitHub repo")
+            description = "The owner of the source GitHub repo")
     String gOwner;
 
     @CommandLine.Option(
@@ -42,7 +42,7 @@ public class Command implements Runnable {
             required = true,
             interactive = true,
             defaultValue = "${GITHUB_TOKEN}",
-            description = "The GitHub authentication token")
+            description = "Your GitHub personal access token")
     String gToken;
 
     @CommandLine.Option(
