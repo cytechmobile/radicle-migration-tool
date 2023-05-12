@@ -5,6 +5,12 @@ on:
   push:
     branches: [ main ]
 
+# By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
+# With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
+concurrency:
+  group: Release-${{github.ref}}
+  cancel-in-progress: true
+
 jobs:
   releaseJavaBinary:
     name: Release Java Binary
