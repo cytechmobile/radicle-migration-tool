@@ -23,6 +23,12 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
+      # setup local ssh-agent and add the radicle private key
+      - name: Setup ssh-agent
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       # Run tests and build the application
       - name: build
         working-directory: './'
