@@ -23,10 +23,6 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-      # Start the SSH Agent
-      - name: Start the SSH Agent
-        uses: frankdejonge/use-ssh-agent@1.0.0
-
       # Start ssh-agent and set it to use the same ssh_auth_sock value.
       - name: Add the secret key to the SSH Agent
         env:
