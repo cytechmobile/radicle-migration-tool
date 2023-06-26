@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.time.Instant;
 
 @ApplicationScoped
 public class GitHubClient implements IGitHubClient {
@@ -24,7 +25,7 @@ public class GitHubClient implements IGitHubClient {
     @Inject ObjectMapper mapper;
     @Inject Config config;
 
-    public List<Issue> getIssues(int page) throws Exception {
+    public List<Issue> getIssues(int page, Instant since) throws Exception {
         var url = String.join("/", List.of(
                 Strings.nullToEmpty(config.getGithub().url()), "repos",
                 Strings.nullToEmpty(config.getGithub().owner()),
@@ -35,6 +36,7 @@ public class GitHubClient implements IGitHubClient {
                 .queryParam("state", "all")
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", page)
+                .queryParam("since", since.toString())
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))

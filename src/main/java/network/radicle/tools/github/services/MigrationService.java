@@ -13,11 +13,12 @@ import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 
 @ApplicationScoped
-public class MigrationService {
+public class MigrationService extends AbstractMigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationService.class);
     private static final String DATE_PATTERN_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -33,16 +34,26 @@ public class MigrationService {
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
             var session = radicle.createSession();
+            if (session == null) {
+                logger.error("Migration failed: cannot session creation");
+                return false;
+            }
+
             logger.info("Created radicle session: {}", session.id);
+
+            var lastRun = getLastRun();
+            logger.info("Started migration: since={}", lastRun);
+
             while (hasMoreIssues) {
                 List<Issue> issues = List.of();
                 try {
-                    issues = github.getIssues(page);
+                    issues = github.getIssues(page, lastRun);
                     var batchSize = issues.size();
                     logger.debug("Migrating page: {} with size: {}", page, batchSize);
+
                     for (var issue : issues) {
-                        //ignore pull requests
-                        if (issue.pullRequest != null) {
+                        //ignore pull requests and issues that created before the lastRun
+                        if (issue.pullRequest != null || issue.createdAt.isBefore(lastRun)) {
                             continue;
                         }
                         total++;
@@ -81,8 +92,10 @@ public class MigrationService {
                     page++;
                 }
             }
+            setLastRun(Instant.now());
+
             logger.info("Total processed issues: {}", total);
-            if (partiallyOrNonMigratedIssues.size() > 0) {
+            if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }
             return true;
@@ -90,6 +103,12 @@ public class MigrationService {
             logger.error("Migration failed: {}", ex.getMessage());
             return false;
         }
+    }
+
+    public String getLastRunPropertyName() {
+        var radProject = config.getRadicle().project().replace("rad:", "");
+        return  "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
+                ".lastRunInMillis";
     }
 
 }

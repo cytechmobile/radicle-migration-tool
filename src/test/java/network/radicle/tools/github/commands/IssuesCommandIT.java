@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,14 +51,14 @@ class IssuesCommandIT {
         private static final Logger logger = LoggerFactory.getLogger(MockedGitHubClient.class);
 
         @Override
-        public List<Issue> getIssues(int page) throws Exception {
+        public List<Issue> getIssues(int page, Instant since) {
             var issues = IssueTest.loadGitHubIssues();
             logger.info("Returning {} issues for page {}", issues.size(), page);
             return issues;
         }
 
         @Override
-        public List<Comment> getComments(long issueId, int page) throws Exception {
+        public List<Comment> getComments(long issueId, int page) {
             var comments = CommentTest.loadGitHubComments();
             logger.info("Returning {} comments for page {}", comments.size(), page);
             return comments;
@@ -70,7 +71,7 @@ class IssuesCommandIT {
         private static final Logger logger = LoggerFactory.getLogger(MockedRadicleClient.class);
 
         @Override
-        public Session createSession() throws Exception {
+        public Session createSession() {
             var session = new Session();
             session.id = UUID.randomUUID().toString();
             logger.info("Returning session id: {}", session.id);
@@ -78,14 +79,14 @@ class IssuesCommandIT {
         }
 
         @Override
-        public String createIssue(Session session, network.radicle.tools.github.core.radicle.Issue issue) throws Exception {
+        public String createIssue(Session session, network.radicle.tools.github.core.radicle.Issue issue) {
             var id = UUID.randomUUID().toString();
             logger.info("Returning issue id: {}", id);
             return id;
         }
 
         @Override
-        public boolean updateIssue(Session session, String id, Action action) throws Exception {
+        public boolean updateIssue(Session session, String id, Action action) {
             logger.info("Returning issue updated");
             return true;
         }
