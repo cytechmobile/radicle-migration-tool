@@ -1,7 +1,6 @@
 package network.radicle.tools.github.utils;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 
 public class Multibase {
@@ -15,7 +14,7 @@ public class Multibase {
             this.prefix = prefix;
         }
 
-        private final static Map<Character, Base> lookup = new TreeMap<>();
+        private static Map<Character, Base> lookup = new TreeMap<>();
 
         static {
             for (Base b : Base.values()) {
@@ -32,10 +31,12 @@ public class Multibase {
     }
 
     public static String encode(Base b, byte[] data) {
-        if (Objects.requireNonNull(b) == Base.Base58BTC) {
-            return b.prefix + Base58.encode(data);
+        switch (b) {
+            case Base58BTC:
+                return b.prefix + Base58.encode(data);
+            default:
+                throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
         }
-        throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
     }
 
     public static Base encoding(String data) {
@@ -48,9 +49,11 @@ public class Multibase {
         }
         Base b = encoding(data);
         String rest = data.substring(1);
-        if (Objects.requireNonNull(b) == Base.Base58BTC) {
-            return Base58.decode(rest);
+        switch (b) {
+            case Base58BTC:
+                return Base58.decode(rest);
+            default:
+                throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
         }
-        throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
     }
 }
