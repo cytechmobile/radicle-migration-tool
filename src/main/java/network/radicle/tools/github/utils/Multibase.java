@@ -1,0 +1,56 @@
+package network.radicle.tools.github.utils;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+
+public class Multibase {
+
+    public enum Base {
+        Base58BTC('z');
+
+        public final char prefix;
+
+        Base(char prefix) {
+            this.prefix = prefix;
+        }
+
+        private final static Map<Character, Base> lookup = new TreeMap<>();
+
+        static {
+            for (Base b : Base.values()) {
+                lookup.put(b.prefix, b);
+            }
+        }
+
+        public static Base lookup(char p) {
+            if (!lookup.containsKey(p)) {
+                throw new IllegalArgumentException("Unknown Multibase type: " + p);
+            }
+            return lookup.get(p);
+        }
+    }
+
+    public static String encode(Base b, byte[] data) {
+        if (Objects.requireNonNull(b) == Base.Base58BTC) {
+            return b.prefix + Base58.encode(data);
+        }
+        throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
+    }
+
+    public static Base encoding(String data) {
+        return Base.lookup(data.charAt(0));
+    }
+
+    public static byte[] decode(String data) {
+        if (data.isEmpty()) {
+            throw new IllegalArgumentException("Cannot decode an empty string");
+        }
+        Base b = encoding(data);
+        String rest = data.substring(1);
+        if (Objects.requireNonNull(b) == Base.Base58BTC) {
+            return Base58.decode(rest);
+        }
+        throw new UnsupportedOperationException("Unsupported base encoding: " + b.name());
+    }
+}

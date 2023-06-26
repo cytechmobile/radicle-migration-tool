@@ -13,10 +13,11 @@ import network.radicle.tools.github.core.radicle.Issue;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.core.radicle.actions.Action;
 import network.radicle.tools.github.handlers.ResponseHandler;
+import network.radicle.tools.github.services.SshAgentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 public class RadicleClient implements IRadicleClient {
@@ -25,26 +26,42 @@ public class RadicleClient implements IRadicleClient {
     @Inject Client client;
     @Inject ObjectMapper mapper;
     @Inject Config config;
+    @Inject SshAgentService agent;
 
     @Override
     public Session createSession() throws Exception {
-        var url = String.join("/", List.of(
-                Strings.nullToEmpty(config.getRadicle().url()),
-                Strings.nullToEmpty(config.getRadicle().version()), "sessions"));
+        var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/sessions";
 
         logger.debug("Creating radicle session: {}", url);
+        Session session;
         try (var resp = client.target(url).request().post(null)) {
             var json = ResponseHandler.handleResponse(resp);
-            return mapper.readValue(json, Session.class);
+            session =  mapper.readValue(json, Session.class);
         }
+
+        session.signature = agent.sign(session);
+        logger.debug("Got signature: {}", session.signature);
+
+        var authSessionUrl = url + '/' + session.id;
+        var authBody = Map.of("pk", session.publicKey, "sig", session.signature);
+
+        logger.debug("Authenticating radicle session: {}", session.id);
+        try (var resp = client.target(authSessionUrl).request().put(Entity.json(authBody))) {
+            var json = ResponseHandler.handleResponse(resp);
+            var jsonNode = mapper.readTree(json);
+            var success = jsonNode.get("success").asBoolean();
+            if (!success) {
+                logger.error("Session authentication failed.");
+                return null;
+            }
+        }
+        return session;
     }
 
     @Override
     public String createIssue(Session session, Issue issue) throws Exception {
-        var url = String.join("/", List.of(
-                Strings.nullToEmpty(config.getRadicle().url()),
-                Strings.nullToEmpty(config.getRadicle().version()), "projects",
-                Strings.nullToEmpty(config.getRadicle().project()), "issues"));
+        var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/projects/" +
+        config.getRadicle().project() + "/issues";
 
         logger.debug("Creating radicle issue: {}", url);
         try (var resp = client.target(url).request()
@@ -63,10 +80,8 @@ public class RadicleClient implements IRadicleClient {
 
     @Override
     public boolean updateIssue(Session session, String id, Action action) throws Exception {
-        var url = String.join("/", List.of(
-                Strings.nullToEmpty(config.getRadicle().url()),
-                Strings.nullToEmpty(config.getRadicle().version()), "projects",
-                Strings.nullToEmpty(config.getRadicle().project()), "issues", id));
+        var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/projects/" +
+                config.getRadicle().project() + "/issues/" + id;
 
         logger.debug("Updating radicle issue: {} with url: {}", id, url);
         try (var resp = client.target(url)

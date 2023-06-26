@@ -71,6 +71,17 @@
       <artifactId>quarkus-picocli</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.sshtools</groupId>
+      <artifactId>maverick-synergy</artifactId>
+      <version>3.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sshtools</groupId>
+      <artifactId>maverick-sshagent</artifactId>
+      <version>3.0.10</version>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>io.quarkus</groupId>
