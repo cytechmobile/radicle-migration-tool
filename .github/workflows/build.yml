@@ -23,8 +23,8 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-      # Start ssh-agent and set it to use the same ssh_auth_sock value.
-      - name: Add the secret key to the SSH Agent
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
         env:
           SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
@@ -34,6 +34,7 @@ jobs:
           echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+
       # Run tests and build the application
       - name: build
         working-directory: './'

@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, feature/incrementalMigrations ]
 
 # By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
 # With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
@@ -29,6 +29,18 @@ jobs:
         with:
           distribution: corretto
           java-version: 17
+
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
 
       - name: Build Java Executable
         run: ./mvnw package
@@ -60,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v3
@@ -81,6 +93,18 @@ jobs:
         with:
           distribution: corretto
           java-version: 17
+
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
 
       - name: Setup GraalVM
         if: startsWith(matrix.os, 'macos-') || startsWith(matrix.os, 'windows-')
