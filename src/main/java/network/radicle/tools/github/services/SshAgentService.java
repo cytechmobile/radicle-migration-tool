@@ -1,8 +1,7 @@
 package network.radicle.tools.github.services;
 
 import com.sshtools.agent.client.SshAgentClient;
-import com.sshtools.common.ssh.SshException;
-import com.sshtools.common.ssh.components.jce.SshEd25519PublicKey;
+import com.sshtools.common.ssh.components.SshPublicKey;
 import com.sshtools.common.ssh.components.jce.SshEd25519PublicKeyJCE;
 import jakarta.enterprise.context.ApplicationScoped;
 import network.radicle.tools.github.core.radicle.Session;
@@ -35,7 +34,7 @@ public class SshAgentService {
         // the rest are the bytes if the public key
         var decodedPKey = Arrays.copyOfRange(multiCodedPKey, MULTI_CODEC_TYPE.length, multiCodedPKey.length);
 
-        SshEd25519PublicKey publicKey;
+        SshPublicKey publicKey;
         try {
             publicKey = new SshEd25519PublicKeyJCE(decodedPKey);
         } catch (Exception e) {
@@ -55,9 +54,8 @@ public class SshAgentService {
                     signed.length);
 
             return Multibase.encode(Multibase.Base.Base58BTC, signature);
-        } catch (SshException e) {
-            logger.error("Failed to sign the session. Make sure that you have added your keys to your local ssh agent. " +
-                    "If not, just run the rad auth command.", e);
+        } catch (Exception e) {
+            logger.error("Failed to sign the session.", e);
             return null;
         }
     }
