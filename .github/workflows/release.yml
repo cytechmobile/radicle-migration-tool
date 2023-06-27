@@ -77,6 +77,12 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v3
 
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
       - name: Setup Environment
         shell: bash
         run: |
@@ -87,12 +93,6 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "MAVEN_COMMAND=$MAVEN_COMMAND" >> $GITHUB_ENV
           echo "ASSET_SUFFIX=$ASSET_SUFFIX" >> $GITHUB_ENV
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: corretto
-          java-version: 17
 
       # Start SSH Agent and add the private key
       - name: Start SSH Agent and add the private key
