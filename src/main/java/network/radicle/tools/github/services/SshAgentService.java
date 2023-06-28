@@ -23,7 +23,7 @@ public class SshAgentService {
         try {
             agent = SshAgentClient.connectOpenSSHAgent("radicle-github-migrate");
         } catch (Exception e) {
-            logger.error("Failed to connect to the local ssh agent. Error: {}", e.getMessage());
+            logger.warn("Failed to connect to the local ssh agent. Message: {}", e.getMessage());
             return null;
         }
 
@@ -33,11 +33,11 @@ public class SshAgentService {
 
         // the first two bytes are the multi-codec key type for Ed25519 keys [0xED, 0x1]
         // the rest are the bytes if the public key
-        var decodedPKey = Arrays.copyOfRange(multiCodedPKey, MULTI_CODEC_TYPE.length, multiCodedPKey.length);
+        var decodedPublicKey = Arrays.copyOfRange(multiCodedPKey, MULTI_CODEC_TYPE.length, multiCodedPKey.length);
 
         SshPublicKey publicKey;
         try {
-            publicKey = new SshEd25519PublicKeyJCE(decodedPKey);
+            publicKey = new SshEd25519PublicKeyJCE(decodedPublicKey);
             logger.debug("Decoded public key for signing: {}",
                     publicKey.getAlgorithm() + " " + Base64.encodeBytes(publicKey.getEncoded(), true));
         } catch (Exception e) {

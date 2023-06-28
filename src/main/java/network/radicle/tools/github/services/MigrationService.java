@@ -79,7 +79,7 @@ public class MigrationService extends AbstractMigrationService {
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
-                            logger.warn("Failed to migrate issue: {}, error: {}", issue.number, ex.getMessage());
+                            logger.warn("Failed to migrate issue: {}. Error: {}", issue.number, ex.getMessage());
                         }
                     }
                     logger.info("Total processed until now: {}", total);
@@ -88,7 +88,7 @@ public class MigrationService extends AbstractMigrationService {
                 } catch (InternalServerErrorException | BadRequestException ex) {
                     var ids = issues.stream().map(i -> i.number).toList();
                     partiallyOrNonMigratedIssues.addAll(ids);
-                    logger.warn("Failed to migrate issues: {}, error: {}", ids, ex.getMessage());
+                    logger.warn("Failed to migrate issues: {}. Error: {}", ids, ex.getMessage());
                     page++;
                 }
             }
