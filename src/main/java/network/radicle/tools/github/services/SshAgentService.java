@@ -3,6 +3,7 @@ package network.radicle.tools.github.services;
 import com.sshtools.agent.client.SshAgentClient;
 import com.sshtools.common.ssh.components.SshPublicKey;
 import com.sshtools.common.ssh.components.jce.SshEd25519PublicKeyJCE;
+import com.sshtools.common.util.Base64;
 import jakarta.enterprise.context.ApplicationScoped;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.utils.Multibase;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 @ApplicationScoped
 public class SshAgentService {
     private static final Logger logger = LoggerFactory.getLogger(SshAgentService.class);
-    public static final byte[] MULTI_CODEC_TYPE = new byte[] {(byte) 0xED, (byte) 0x1};
+    public static final byte[] MULTI_CODEC_TYPE = new byte[]{(byte) 0xED, (byte) 0x1};
 
     public String sign(Session session) {
         SshAgentClient agent;
@@ -37,6 +38,8 @@ public class SshAgentService {
         SshPublicKey publicKey;
         try {
             publicKey = new SshEd25519PublicKeyJCE(decodedPKey);
+            logger.debug("Decoded public key for signing: {}",
+                    publicKey.getAlgorithm() + " " + Base64.encodeBytes(publicKey.getEncoded(), true));
         } catch (Exception e) {
             logger.error("Failed to decode the public key", e);
             return null;

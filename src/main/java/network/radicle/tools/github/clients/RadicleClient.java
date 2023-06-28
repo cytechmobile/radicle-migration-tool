@@ -40,12 +40,11 @@ public class RadicleClient implements IRadicleClient {
         }
 
         session.signature = agent.sign(session);
-        logger.debug("Got signature: {}", session.signature);
 
         var authSessionUrl = url + '/' + session.id;
-        var authBody = Map.of("pk", session.publicKey, "sig", session.signature);
+        logger.debug("Authenticating radicle session: {}", authSessionUrl);
 
-        logger.debug("Authenticating radicle session: {}", session.id);
+        var authBody = Map.of("pk", session.publicKey, "sig", session.signature);
         try (var resp = client.target(authSessionUrl).request().put(Entity.json(authBody))) {
             var json = ResponseHandler.handleResponse(resp);
             var jsonNode = mapper.readTree(json);
