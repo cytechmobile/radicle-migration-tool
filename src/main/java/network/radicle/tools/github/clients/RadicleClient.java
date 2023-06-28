@@ -45,7 +45,7 @@ public class RadicleClient implements IRadicleClient {
 
         // in case the signing session failed (e.g. due to ssh agent not being accessible)
         // fallback to creating session via the cli
-        if (session.signature == null){
+        if (session.signature == null) {
             logger.info("Fallback to creating a signed session via the CLI.");
             session = cli.createSession();
         }
