@@ -13,6 +13,7 @@ import network.radicle.tools.github.core.radicle.Issue;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.core.radicle.actions.Action;
 import network.radicle.tools.github.handlers.ResponseHandler;
+import network.radicle.tools.github.services.CliService;
 import network.radicle.tools.github.services.SshAgentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class RadicleClient implements IRadicleClient {
     @Inject ObjectMapper mapper;
     @Inject Config config;
     @Inject SshAgentService agent;
+    @Inject CliService cli;
 
     @Override
     public Session createSession() throws Exception {
@@ -40,6 +42,13 @@ public class RadicleClient implements IRadicleClient {
         }
 
         session.signature = agent.sign(session);
+
+        // in case the signing session failed (e.g. due to ssh agent not being accessible)
+        // fallback to creating session via the cli
+        if (session.signature == null){
+            logger.info("Fallback to creating a signed session via the CLI.");
+            session = cli.createSession();
+        }
 
         var authSessionUrl = url + '/' + session.id;
         logger.debug("Authenticating radicle session: {}", authSessionUrl);

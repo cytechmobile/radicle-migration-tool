@@ -23,7 +23,7 @@ public class SshAgentService {
         try {
             agent = SshAgentClient.connectOpenSSHAgent("radicle-github-migrate");
         } catch (Exception e) {
-            logger.error("Failed to connect to the local ssh agent.", e);
+            logger.error("Failed to connect to the local ssh agent. Error: {}", e.getMessage());
             return null;
         }
 
@@ -58,7 +58,7 @@ public class SshAgentService {
 
             return Multibase.encode(Multibase.Base.Base58BTC, signature);
         } catch (Exception e) {
-            logger.error("Failed to sign the session.", e);
+            logger.error("Failed to sign the session. Error: {}", e.getMessage());
             return null;
         }
     }

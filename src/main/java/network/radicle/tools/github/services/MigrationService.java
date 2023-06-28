@@ -1,5 +1,6 @@
 package network.radicle.tools.github.services;
 
+import com.google.common.base.Strings;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -20,7 +21,6 @@ import java.util.List;
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationService.class);
-    private static final String DATE_PATTERN_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Inject IGitHubClient github;
     @Inject IRadicleClient radicle;
@@ -100,7 +100,7 @@ public class MigrationService extends AbstractMigrationService {
             }
             return true;
         } catch (Exception ex) {
-            logger.error("Migration failed: {}", ex.getMessage());
+            logger.error("Migration failed: {}", Strings.nullToEmpty(ex.getMessage()));
             return false;
         }
     }
