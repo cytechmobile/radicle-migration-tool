@@ -63,7 +63,9 @@ class IssuesCommandIT {
 
         @Override
         public List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
-            return null;
+            var events = EventTest.loadGitHubEvents();
+            logger.info("Returning {} events for page {}", events.size(), page);
+            return events;
         }
 
         @Override
