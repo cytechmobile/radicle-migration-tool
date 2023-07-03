@@ -19,7 +19,7 @@ public class IssuesCommand extends Command {
         var exitCode = 0;
         if (!result) {
             exitCode = 1;
-            logger.error("Migration failed!");
+            logger.error("Migration failed.");
         } else {
             logger.info("Migration finished successfully!");
         }

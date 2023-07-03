@@ -8,15 +8,21 @@ import jakarta.ws.rs.InternalServerErrorException;
 import network.radicle.tools.github.Config;
 import network.radicle.tools.github.clients.IGitHubClient;
 import network.radicle.tools.github.clients.IRadicleClient;
+import network.radicle.tools.github.core.github.Comment;
+import network.radicle.tools.github.core.github.Event;
 import network.radicle.tools.github.core.github.Issue;
+import network.radicle.tools.github.core.github.Timeline;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
@@ -35,14 +41,15 @@ public class MigrationService extends AbstractMigrationService {
         try {
             var session = radicle.createSession();
             if (session == null) {
-                logger.error("Migration failed: cannot session creation");
+                logger.error("Could not authenticate your session.");
+                logger.info("Hint: To setup your radicle profile and register your key with the ssh-agent, run `rad auth`.");
                 return false;
             }
 
             logger.info("Created radicle session: {}", session.id);
 
             var lastRun = getLastRun();
-            logger.info("Started migration: since={}", lastRun);
+            logger.info("Started migration: since={}", Timeline.DTF.format(lastRun));
 
             while (hasMoreIssues) {
                 List<Issue> issues = List.of();
@@ -66,16 +73,24 @@ public class MigrationService extends AbstractMigrationService {
                                 radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
                             }
 
-                            // process issue's comments
-                            var commentsPage = 1;
-                            var hasMoreComments = true;
-                            while (hasMoreComments) {
-                                var comments = github.getComments(issue.number, commentsPage);
-                                for (var comment : comments) {
-                                    radicle.updateIssue(session, id, new CommentAction(comment.getBodyWithMeta()));
+                            var comments = getCommentsFor(issue);
+                            var events = getEventsFor(issue, true);
+
+                            //now put everything in chronological order
+                            var timeline = Stream.concat(comments.stream(), events.stream())
+                                    .sorted(Comparator.comparing(Timeline::getCreatedAt))
+                                    .toList();
+
+                            for (var event : timeline) {
+                                //fetch any extra information for specific event types
+                                if (Event.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
+                                        Event.Type.CLOSED.value.equalsIgnoreCase(event.getType())) {
+                                    var e = ((Event) event);
+                                    if (e.commitUrl != null) {
+                                        e.commit = github.getCommit(e.commitId);
+                                    }
                                 }
-                                hasMoreComments = config.getGithub().pageSize() == comments.size();
-                                commentsPage++;
+                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata()));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
@@ -105,9 +120,35 @@ public class MigrationService extends AbstractMigrationService {
         }
     }
 
+    private List<Comment> getCommentsFor(Issue issue) throws Exception {
+        var page = 1;
+        var hasMore = true;
+        var commentsList = new ArrayList<Comment>();
+        while (hasMore) {
+            var comments = github.getComments(issue.number, page);
+            commentsList.addAll(comments);
+            hasMore = config.getGithub().pageSize() == comments.size();
+            page++;
+        }
+        return commentsList;
+    }
+
+    private List<Event> getEventsFor(Issue issue, boolean timeline) throws Exception {
+        var page = 1;
+        var hasMore = true;
+        var eventsList = new ArrayList<Event>();
+        while (hasMore) {
+            var events = github.getEvents(issue.number, page, timeline);
+            eventsList.addAll(events.stream().filter(e -> Event.Type.isValid(e.event)).toList());
+            hasMore = config.getGithub().pageSize() == events.size();
+            page++;
+        }
+        return eventsList;
+    }
+
     public String getLastRunPropertyName() {
         var radProject = config.getRadicle().project().replace("rad:", "");
-        return  "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
+        return "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
                 ".lastRunInMillis";
     }
 

@@ -9,10 +9,7 @@ import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
 import network.radicle.tools.github.clients.IGitHubClient;
 import network.radicle.tools.github.clients.IRadicleClient;
-import network.radicle.tools.github.core.github.Comment;
-import network.radicle.tools.github.core.github.CommentTest;
-import network.radicle.tools.github.core.github.Issue;
-import network.radicle.tools.github.core.github.IssueTest;
+import network.radicle.tools.github.core.github.*;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.core.radicle.actions.Action;
 import org.junit.jupiter.api.Test;
@@ -58,10 +55,20 @@ class IssuesCommandIT {
         }
 
         @Override
-        public List<Comment> getComments(long issueId, int page) {
+        public List<Comment> getComments(long issueNumber, int page) {
             var comments = CommentTest.loadGitHubComments();
             logger.info("Returning {} comments for page {}", comments.size(), page);
             return comments;
+        }
+
+        @Override
+        public List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
+            return null;
+        }
+
+        @Override
+        public Commit getCommit(String commitId) throws Exception {
+            return null;
         }
     }
 

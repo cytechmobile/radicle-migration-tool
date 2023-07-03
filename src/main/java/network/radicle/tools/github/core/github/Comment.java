@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Comment {
+public class Comment extends Timeline {
 
     @JsonProperty("id")
     public Long id;
@@ -31,12 +31,13 @@ public class Comment {
     @JsonProperty("author_association")
     public String authorAssociation;
 
-    public String getMeta() {
-        return "> github comment: commented on " + this.createdAt.toString() + " by " + this.user.login;
+    public String getMetadata() {
+        return "> github comment: commented on " + Timeline.DTF.format(this.createdAt).replace(":", "\\:") +
+                " by " + this.user.login;
     }
 
-    public String getBodyWithMeta() {
-        return this.getMeta() + "\n\n" + this.body;
+    public String getBody() {
+        return this.body;
     }
 
     @Override
@@ -53,5 +54,15 @@ public class Comment {
                 ", issueUrl='" + issueUrl + '\'' +
                 ", authorAssociation='" + authorAssociation + '\'' +
                 '}';
+    }
+
+    @Override
+    public String getType() {
+        return "comment";
+    }
+
+    @Override
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

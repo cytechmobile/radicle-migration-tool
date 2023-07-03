@@ -97,8 +97,9 @@ public class Issue {
     }
 
     public String getMeta() {
-        var meta = "> github issue: #" + this.number + " opened on " + this.createdAt.toString() +
-                " by " + this.user.login;
+        var meta = "> github issue: #" + this.number + " created at " +
+                Timeline.DTF.format(this.createdAt).replace(":", "\\:") + " by " + this.user.login;
+
         if (this.assignees != null) {
             meta += " and assigned to " + this.assignees.stream().map(a -> a.login)
                     .collect(Collectors.joining(", "));

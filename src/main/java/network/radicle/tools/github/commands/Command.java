@@ -13,7 +13,7 @@ public class Command implements Runnable {
 
     @CommandLine.Option(
             names = {"-gv", "--github-api-version"},
-                defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
+            defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
             description = "The version of the GitHub REST API (default 2022-11-28)")
     String gVersion;
 
