@@ -1,4 +1,3 @@
-
 package network.radicle.tools.github.core.github;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -97,10 +96,10 @@ public class Issue {
     }
 
     public String getMeta() {
-        var meta = "> github issue: #" + this.number + " created at " +
+        var meta = "> github issue: #" + this.number + " created on " +
                 Timeline.DTF.format(this.createdAt).replace(":", "\\:") + " by " + this.user.login;
 
-        if (this.assignees != null) {
+        if (this.assignees != null && !this.assignees.isEmpty()) {
             meta += " and assigned to " + this.assignees.stream().map(a -> a.login)
                     .collect(Collectors.joining(", "));
         }

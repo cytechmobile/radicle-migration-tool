@@ -34,7 +34,6 @@ public class RadicleClient implements IRadicleClient {
     public Session createSession() throws Exception {
         var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/sessions";
 
-        logger.debug("Creating radicle session: {}", url);
         Session session;
         try (var resp = client.target(url).request().post(null)) {
             var json = ResponseHandler.handleResponse(resp);
@@ -46,7 +45,7 @@ public class RadicleClient implements IRadicleClient {
         // in case the signing session failed (e.g. due to ssh agent not being accessible)
         // fallback to creating session via the cli
         if (session.signature == null) {
-            logger.debug("Fallback to signing the session via the rad CLI.");
+            logger.debug("Fallback to session signing via the rad CLI.");
             session = cli.createSession();
         }
 
@@ -55,8 +54,6 @@ public class RadicleClient implements IRadicleClient {
         }
 
         var authSessionUrl = url + '/' + session.id;
-        logger.debug("Authenticating radicle session: {}", authSessionUrl);
-
         var authBody = Map.of("pk", session.publicKey, "sig", session.signature);
         try (var resp = client.target(authSessionUrl).request().put(Entity.json(authBody))) {
             var json = ResponseHandler.handleResponse(resp);
@@ -75,7 +72,7 @@ public class RadicleClient implements IRadicleClient {
         var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/projects/" +
         config.getRadicle().project() + "/issues";
 
-        logger.debug("Creating radicle issue: {}", url);
+        logger.trace("Creating radicle issue {}", issue);
         try (var resp = client.target(url).request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))
                 .post(Entity.json(issue))) {
@@ -95,7 +92,7 @@ public class RadicleClient implements IRadicleClient {
         var url = config.getRadicle().url() + "/" + config.getRadicle().version() + "/projects/" +
                 config.getRadicle().project() + "/issues/" + id;
 
-        logger.debug("Updating radicle issue: {} with url: {}", id, url);
+        logger.trace("Updating radicle issue {} by using action {}", id, action.type);
         try (var resp = client.target(url)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))

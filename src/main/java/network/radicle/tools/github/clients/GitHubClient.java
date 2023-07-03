@@ -31,7 +31,6 @@ public class GitHubClient implements IGitHubClient {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
                 "/issues";
 
-        logger.debug("Fetching GitHub issues: {}", url);
         try (var resp = client.target(url)
                 .queryParam("state", "all")
                 .queryParam("per_page", config.getGithub().pageSize())
@@ -54,7 +53,6 @@ public class GitHubClient implements IGitHubClient {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
                 "/issues/" + issueNumber + "/comments";
 
-        logger.debug("Fetching GitHub comments for issue {}: {}", issueNumber, url);
         try (var resp = client.target(url)
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", page)
@@ -77,7 +75,6 @@ public class GitHubClient implements IGitHubClient {
 
         url += timeline ? "/timeline" : "/events";
 
-        logger.debug("Fetching GitHub events for issue {}: {}", issueNumber, url);
         try (var resp = client.target(url)
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", page)
@@ -88,7 +85,6 @@ public class GitHubClient implements IGitHubClient {
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
-            //logger.debug("{}", json);
             return mapper.readValue(json, new TypeReference<>() {
             });
         }
@@ -99,7 +95,6 @@ public class GitHubClient implements IGitHubClient {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
                 "/commits/" + commitId;
 
-        logger.debug("Fetching GitHub commit: {}", url);
         try (var resp = client.target(url)
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", 1)
@@ -110,7 +105,6 @@ public class GitHubClient implements IGitHubClient {
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
-            logger.debug("{}", json);
             return mapper.readValue(json, new TypeReference<>() {
             });
         }

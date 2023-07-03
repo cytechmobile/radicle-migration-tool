@@ -35,35 +35,34 @@ public class MigrationService extends AbstractMigrationService {
     public boolean migrateIssues() {
         var page = 1;
         var hasMoreIssues = true;
-        var total = 0;
+        var processedCount = 0;
+        var commentsCount = 0;
+        var eventsCount = 0;
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
+            var lastRun = getLastRun();
+            logger.info("Migration started with filters: since: {}", Timeline.DTF.format(lastRun));
+
             var session = radicle.createSession();
             if (session == null) {
-                logger.error("Could not authenticate your session.");
+                logger.error("Session could not get authenticated.");
                 logger.info("Hint: To setup your radicle profile and register your key with the ssh-agent, run `rad auth`.");
                 return false;
             }
 
-            logger.info("Created radicle session: {}", session.id);
-
-            var lastRun = getLastRun();
-            logger.info("Started migration: since={}", Timeline.DTF.format(lastRun));
+            logger.debug("Radicle session created: {}", session.id);
 
             while (hasMoreIssues) {
                 List<Issue> issues = List.of();
                 try {
                     issues = github.getIssues(page, lastRun);
-                    var batchSize = issues.size();
-                    logger.debug("Migrating page: {} with size: {}", page, batchSize);
-
                     for (var issue : issues) {
                         //ignore pull requests and issues that created before the lastRun
                         if (issue.pullRequest != null || issue.createdAt.isBefore(lastRun)) {
                             continue;
                         }
-                        total++;
+                        processedCount++;
 
                         var radIssue = issue.toRadicle();
                         try {
@@ -81,6 +80,9 @@ public class MigrationService extends AbstractMigrationService {
                                     .sorted(Comparator.comparing(Timeline::getCreatedAt))
                                     .toList();
 
+                            commentsCount += comments.size();
+                            eventsCount += events.size();
+
                             for (var event : timeline) {
                                 //fetch any extra information for specific event types
                                 if (Event.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
@@ -97,7 +99,8 @@ public class MigrationService extends AbstractMigrationService {
                             logger.warn("Failed to migrate issue: {}. Error: {}", issue.number, ex.getMessage());
                         }
                     }
-                    logger.info("Total processed until now: {}", total);
+                    logger.info("Processed issues: {}, comments: {}, events: {} ...", processedCount, commentsCount, eventsCount);
+
                     hasMoreIssues = config.getGithub().pageSize() == issues.size();
                     page++;
                 } catch (InternalServerErrorException | BadRequestException ex) {
@@ -109,7 +112,6 @@ public class MigrationService extends AbstractMigrationService {
             }
             setLastRun(Instant.now());
 
-            logger.info("Total processed issues: {}", total);
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }

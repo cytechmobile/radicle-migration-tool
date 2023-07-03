@@ -38,7 +38,7 @@ public class SshAgentService {
         SshPublicKey publicKey;
         try {
             publicKey = new SshEd25519PublicKeyJCE(decodedPublicKey);
-            logger.debug("Decoded public key for signing: {}",
+            logger.debug("Public key for signing: {}",
                     publicKey.getAlgorithm() + " " + Base64.encodeBytes(publicKey.getEncoded(), true));
         } catch (Exception e) {
             logger.debug("Failed to decode the public key", e);
@@ -51,8 +51,6 @@ public class SshAgentService {
         try {
             signed = agent.sign(publicKey, publicKey.getSigningAlgorithm(),
                     dataToSign.getBytes(StandardCharsets.UTF_8));
-
-            logger.debug("Got signature from agent: {}", signed);
 
             //the 8 is for the integers that keep the header's and signature's lengths
             var signature = Arrays.copyOfRange(signed, publicKey.getSigningAlgorithm().length() + 8,
