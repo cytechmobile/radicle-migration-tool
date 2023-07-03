@@ -23,7 +23,7 @@ public class SshAgentService {
         try {
             agent = SshAgentClient.connectOpenSSHAgent("radicle-github-migrate");
         } catch (Exception e) {
-            logger.warn("Failed to connect to the local ssh agent. Message: {}", e.getMessage());
+            logger.debug("Failed to connect to the local ssh agent. Message: {}", e.getMessage());
             return null;
         }
 
@@ -41,7 +41,7 @@ public class SshAgentService {
             logger.debug("Decoded public key for signing: {}",
                     publicKey.getAlgorithm() + " " + Base64.encodeBytes(publicKey.getEncoded(), true));
         } catch (Exception e) {
-            logger.error("Failed to decode the public key", e);
+            logger.debug("Failed to decode the public key", e);
             return null;
         }
 
@@ -52,13 +52,15 @@ public class SshAgentService {
             signed = agent.sign(publicKey, publicKey.getSigningAlgorithm(),
                     dataToSign.getBytes(StandardCharsets.UTF_8));
 
+            logger.debug("Got signature from agent: {}", signed);
+
             //the 8 is for the integers that keep the header's and signature's lengths
             var signature = Arrays.copyOfRange(signed, publicKey.getSigningAlgorithm().length() + 8,
                     signed.length);
 
             return Multibase.encode(Multibase.Base.Base58BTC, signature);
         } catch (Exception e) {
-            logger.error("Failed to sign the session. Error: {}", e.getMessage());
+            logger.debug("Failed to sign the session. Error: {}", e.getMessage());
             return null;
         }
     }

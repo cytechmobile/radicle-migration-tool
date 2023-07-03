@@ -9,13 +9,15 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.HttpHeaders;
 import network.radicle.tools.github.Config;
 import network.radicle.tools.github.core.github.Comment;
+import network.radicle.tools.github.core.github.Commit;
+import network.radicle.tools.github.core.github.Event;
 import network.radicle.tools.github.core.github.Issue;
 import network.radicle.tools.github.handlers.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.time.Instant;
+import java.util.List;
 
 @ApplicationScoped
 public class GitHubClient implements IGitHubClient {
@@ -26,10 +28,8 @@ public class GitHubClient implements IGitHubClient {
     @Inject Config config;
 
     public List<Issue> getIssues(int page, Instant since) throws Exception {
-        var url = String.join("/", List.of(
-                Strings.nullToEmpty(config.getGithub().url()), "repos",
-                Strings.nullToEmpty(config.getGithub().owner()),
-                Strings.nullToEmpty(config.getGithub().repo()), "issues"));
+        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+                "/issues";
 
         logger.debug("Fetching GitHub issues: {}", url);
         try (var resp = client.target(url)
@@ -44,19 +44,17 @@ public class GitHubClient implements IGitHubClient {
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
-            return mapper.readValue(json, new TypeReference<>() { });
+            return mapper.readValue(json, new TypeReference<>() {
+            });
         }
     }
 
     @Override
-    public List<Comment> getComments(long issueId, int page) throws Exception {
-        var url = String.join("/", List.of(
-                Strings.nullToEmpty(config.getGithub().url()), "repos",
-                Strings.nullToEmpty(config.getGithub().owner()),
-                Strings.nullToEmpty(config.getGithub().repo()), "issues",
-                Long.toString(issueId), "comments"));
+    public List<Comment> getComments(long issueNumber, int page) throws Exception {
+        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+                "/issues/" + issueNumber + "/comments";
 
-        logger.debug("Fetching GitHub comments for issue {}: {}", issueId, url);
+        logger.debug("Fetching GitHub comments for issue {}: {}", issueNumber, url);
         try (var resp = client.target(url)
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", page)
@@ -67,7 +65,54 @@ public class GitHubClient implements IGitHubClient {
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
-            return mapper.readValue(json, new TypeReference<>() { });
+            return mapper.readValue(json, new TypeReference<>() {
+            });
+        }
+    }
+
+    @Override
+    public List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
+        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+                "/issues/" + issueNumber;
+
+        url += timeline ? "/timeline" : "/events";
+
+        logger.debug("Fetching GitHub events for issue {}: {}", issueNumber, url);
+        try (var resp = client.target(url)
+                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("page", page)
+                .request()
+                .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
+                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .get()) {
+
+            var json = ResponseHandler.handleResponse(resp);
+            //logger.debug("{}", json);
+            return mapper.readValue(json, new TypeReference<>() {
+            });
+        }
+    }
+
+    @Override
+    public Commit getCommit(String commitId) throws Exception {
+        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+                "/commits/" + commitId;
+
+        logger.debug("Fetching GitHub commit: {}", url);
+        try (var resp = client.target(url)
+                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("page", 1)
+                .request()
+                .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
+                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .get()) {
+
+            var json = ResponseHandler.handleResponse(resp);
+            logger.debug("{}", json);
+            return mapper.readValue(json, new TypeReference<>() {
+            });
         }
     }
 }
