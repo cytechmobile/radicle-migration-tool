@@ -1,6 +1,11 @@
 package network.radicle.tools.github;
 
+import com.google.common.base.Strings;
 import jakarta.enterprise.context.ApplicationScoped;
+import network.radicle.tools.github.commands.Command.State;
+
+import java.net.URL;
+import java.time.Instant;
 
 @ApplicationScoped
 public class Config {
@@ -34,26 +39,39 @@ public class Config {
                 '}';
     }
 
-    public record GitHubConfig(String token, String url, String version, String owner, String repo, String since,
-                               String labels, String state, String milestone, String assignee, String creator,
+    public record GitHubConfig(String token, URL url, String version, String owner, String repo, Filters filters,
                                int pageSize) {
         @Override
         public String toString() {
             return "GitHubConfig{" +
-                    "url='" + url + '\'' +
+                    "url=" + url +
                     ", version='" + version + '\'' +
                     ", owner='" + owner + '\'' +
                     ", repo='" + repo + '\'' +
-                    ", since='" + since + '\'' +
-                    ", labels='" + labels + '\'' +
-                    ", state='" + state + '\'' +
-                    ", milestone='" + milestone + '\'' +
-                    ", assignee='" + assignee + '\'' +
-                    ", creator='" + creator + '\'' +
+                    ", filters=" + filters +
                     ", pageSize=" + pageSize +
                     '}';
         }
     }
-    public record RadicleConfig(String url, String version, String project) { }
+    public record RadicleConfig(URL url, String version, String project) { }
+
+    public record Filters(Instant since, String labels, State state, Integer milestone, String assignee,
+                          String creator) {
+        public Filters withSince(Instant s) {
+            return new Filters(s, labels(), state(), milestone(), assignee(), creator());
+        }
+
+        @Override
+        public String toString() {
+            return "[" +
+                    "since='" + (since != null ? since : "") + '\'' +
+                    ", labels='" + Strings.nullToEmpty(labels) + '\'' +
+                    ", state='" + state + '\'' +
+                    ", milestone='" + (milestone != null ? milestone : "") + '\'' +
+                    ", assignee='" + Strings.nullToEmpty(assignee) + '\'' +
+                    ", creator='" + Strings.nullToEmpty(creator) + '\'' +
+                    ']';
+        }
+    }
 
 }

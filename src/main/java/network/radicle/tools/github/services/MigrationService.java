@@ -41,8 +41,11 @@ public class MigrationService extends AbstractMigrationService {
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
-            var lastRun = getLastRun();
-            logger.info("Migration started with filters: since: {}", Timeline.DTF.format(lastRun));
+            var filters = config.getGithub().filters();
+            if (filters.since() == null) {
+                filters = filters.withSince(getLastRun());
+            }
+            logger.info("Migration started with filters: {}", filters);
 
             var session = radicle.createSession();
             if (session == null) {
@@ -56,10 +59,10 @@ public class MigrationService extends AbstractMigrationService {
             while (hasMoreIssues) {
                 List<Issue> issues = List.of();
                 try {
-                    issues = github.getIssues(page, lastRun);
+                    issues = github.getIssues(page, filters);
                     for (var issue : issues) {
-                        //ignore pull requests and issues that created before the lastRun
-                        if (issue.pullRequest != null || issue.createdAt.isBefore(lastRun)) {
+                        //ignore pull requests and issues that created before the since filter
+                        if (issue.pullRequest != null || issue.createdAt.isBefore(filters.since())) {
                             continue;
                         }
                         processedCount++;

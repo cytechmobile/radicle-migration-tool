@@ -38,7 +38,7 @@ public class CliService {
 
     public Session createSession() {
         try {
-            var backend = config.getRadicle().url().replace("/api", "");
+            var backend = config.getRadicle().url().toString().replace("/api", "");
             var command = "rad web -b " + backend + " --json";
 
             var authSessionPayload = execCommand(command, null);

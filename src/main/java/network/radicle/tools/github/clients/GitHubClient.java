@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.HttpHeaders;
 import network.radicle.tools.github.Config;
+import network.radicle.tools.github.commands.Command.State;
 import network.radicle.tools.github.core.github.Comment;
 import network.radicle.tools.github.core.github.Commit;
 import network.radicle.tools.github.core.github.Event;
@@ -16,7 +17,6 @@ import network.radicle.tools.github.handlers.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.List;
 
 @ApplicationScoped
@@ -27,15 +27,21 @@ public class GitHubClient implements IGitHubClient {
     @Inject ObjectMapper mapper;
     @Inject Config config;
 
-    public List<Issue> getIssues(int page, Instant since) throws Exception {
+    public List<Issue> getIssues(int page, Config.Filters filters) throws Exception {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
                 "/issues";
 
+        var milestone = filters.milestone() != null ? filters.milestone().toString() : null;
+        var state = filters.state() != null ? filters.state().name() : State.all.name();
         try (var resp = client.target(url)
-                .queryParam("state", "all")
                 .queryParam("per_page", config.getGithub().pageSize())
                 .queryParam("page", page)
-                .queryParam("since", since.toString())
+                .queryParam("milestone", milestone)
+                .queryParam("state", state)
+                .queryParam("assignee", filters.assignee())
+                .queryParam("creator", filters.creator())
+                .queryParam("labels", filters.labels())
+                .queryParam("since", filters.since().toString())
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))

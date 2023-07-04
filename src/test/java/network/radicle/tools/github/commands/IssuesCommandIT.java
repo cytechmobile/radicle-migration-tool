@@ -7,6 +7,7 @@ import io.quarkus.test.junit.main.QuarkusMainLauncher;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
+import network.radicle.tools.github.Config;
 import network.radicle.tools.github.clients.IGitHubClient;
 import network.radicle.tools.github.clients.IRadicleClient;
 import network.radicle.tools.github.core.github.*;
@@ -19,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +48,7 @@ class IssuesCommandIT {
         private static final Logger logger = LoggerFactory.getLogger(MockedGitHubClient.class);
 
         @Override
-        public List<Issue> getIssues(int page, Instant since) {
+        public List<Issue> getIssues(int page, Config.Filters filters) {
             var issues = IssueTest.loadGitHubIssues();
             logger.info("Returning {} issues for page {}", issues.size(), page);
             return issues;
