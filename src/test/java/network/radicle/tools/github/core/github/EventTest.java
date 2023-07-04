@@ -31,7 +31,7 @@ public class EventTest {
 
     @Test
     public void testCreatedAtFormatting() {
-        var expected = "Apr 14, 2011 16:00:49 UTC";
+        var expected = "Dec 20, 2021 13:42:05 UTC";
         var events = loadGitHubEvents();
         var formatted = Timeline.DTF.format(events.get(0).createdAt);
         assertThat(formatted).isEqualTo(expected);
