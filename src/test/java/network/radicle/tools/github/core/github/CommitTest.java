@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CommitTest {
+public class CommitTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CommitTest.class);
 
