@@ -94,7 +94,7 @@ public class Command implements Runnable {
     @CommandLine.Option(
             names = {"-fm", "--filter-milestone"},
             defaultValue = "${FILTER_MILESTONE}",
-            description = "Migrate issues belonging to this milestone number. If the string * is passed, " +
+            description = "Migrate issues belonging to the given milestone number. If the string * is passed, " +
                     "issues with any milestone will be migrated (example: 3).")
     Integer fMilestone;
 
