@@ -118,6 +118,7 @@ public class MigrationService extends AbstractMigrationService {
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }
+            logger.info("Totally processed issues: {}, comments: {}, events: {}", processedCount, commentsCount, eventsCount);
             return true;
         } catch (Exception ex) {
             logger.error("Migration failed: {}", Strings.nullToEmpty(ex.getMessage()));
