@@ -9,6 +9,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static network.radicle.tools.github.utils.Markdown.bold;
+import static network.radicle.tools.github.utils.Markdown.escape;
+import static network.radicle.tools.github.utils.Markdown.link;
+import static network.radicle.tools.github.utils.Markdown.strikethrough;
+
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Event extends Timeline {
@@ -113,32 +118,32 @@ public class Event extends Timeline {
 
         //actor profile link
         if (!Type.CROSS_REFERENCED.value.equals(event)) {
-            body.add("**[" + this.actor.login + "](" + this.actor.htmlUrl + ")**");
+            body.add(link(bold(this.actor.login), this.actor.htmlUrl));
         }
 
         switch (Type.from(event)) {
             case ASSIGNED, UNASSIGNED -> {
                 body.add(this.event);
-                body.add("**[" + this.assignee.login + "](" + this.assignee.htmlUrl + ")**");
+                body.add(link(bold(this.assignee.login), this.assignee.htmlUrl));
             }
             case LABELED -> {
                 body.add("added the");
-                body.add("**" + this.label.name + "**");
+                body.add(bold(this.label.name));
                 body.add("label");
             }
             case UNLABELED -> {
                 body.add("removed the");
-                body.add("**" + this.label.name + "**");
+                body.add(bold(this.label.name));
                 body.add("label");
             }
             case MILESTONED -> {
                 body.add("added this to the");
-                body.add("**" + this.milestone.title + "**");
+                body.add(bold(this.milestone.title));
                 body.add("milestone");
             }
             case DEMILESTONED -> {
                 body.add("removed this from the");
-                body.add("**" + this.milestone.title + "**");
+                body.add(bold(this.milestone.title));
                 body.add("milestone");
             }
             case CLOSED -> {
@@ -148,41 +153,33 @@ public class Event extends Timeline {
                 }
                 if (commit != null) {
                     var message = this.commit.metadata.message.split("\n")[0];
-                    body.add("in **[" + message + "](" + this.commit.htmlUrl + ")**");
+                    body.add("in");
+                    body.add(link(bold(message), this.commit.htmlUrl));
                 }
             }
             case REOPENED -> body.add("reopened this");
             case RENAMED -> {
                 body.add("changed the title");
-                body.add("~~" + this.rename.from + "~~");
-                body.add("**" + this.rename.to + "**");
+                body.add(strikethrough(this.rename.from));
+                body.add(bold(this.rename.to));
             }
             case CROSS_REFERENCED -> {
                 body.add("This was referenced by");
-                body.add("**[" + this.source.issue.title + "#" + this.source.issue.number + "](" +
-                        this.source.issue.htmlUrl + ")**");
+                body.add(link(bold(this.source.issue.title + " #" + this.source.issue.number),
+                        this.source.issue.htmlUrl));
             }
             case MENTIONED -> body.add("was mentioned");
             case REFERENCED -> {
                 body.add("added the commit");
                 var message = this.commit.metadata.message.split("\n")[0];
-                body.add("**[" + message + "](" + this.commit.htmlUrl + ")**");
+                body.add(link(bold(message), this.commit.htmlUrl));
                 body.add("that referenced this issue");
             }
-            /*case CONNECTED -> {
-                body.add("linked the pull request");
-                body.add("**[" + this.source.issue.title + "#" + this.source.issue.number + "](" + this.source.issue.htmlUrl + ")**");
-            }
-            case DISCONNECTED -> {
-                body.add("removed a link to the pull request");
-                body.add("**[" + this.source.issue.title + "#" + this.source.issue.number + "](" + this.source.issue.htmlUrl + ")**");
-            }*/
-            case UNSUPPORTED -> body.add(this.event);
             default -> body.add(this.event);
         }
 
         //escape : to properly get displayed in radicle web app
-        body.add("on " + DTF.format(this.createdAt).replace(":", "\\:"));
+        body.add("on " + escape(DTF.format(this.createdAt)));
         return String.join(" ", body);
     }
 

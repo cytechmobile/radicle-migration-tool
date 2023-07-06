@@ -18,6 +18,6 @@ public abstract class Timeline {
 
     public String getBodyWithMetadata() {
         var metadata = this.getMetadata();
-        return metadata != null ? metadata + "\n\n" + this.getBody() : this.getBody();
+        return metadata != null ? metadata + "<br/>" + this.getBody() : this.getBody();
     }
 }
