@@ -1,6 +1,5 @@
 package network.radicle.tools.github.services;
 
-import com.google.common.base.Strings;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -121,7 +120,7 @@ public class MigrationService extends AbstractMigrationService {
             logger.info("Totally processed issues: {}, comments: {}, events: {}", processedCount, commentsCount, eventsCount);
             return true;
         } catch (Exception ex) {
-            logger.error("Migration failed: {}", Strings.nullToEmpty(ex.getMessage()));
+            logger.error("Migration failed", ex);
             return false;
         }
     }

@@ -141,7 +141,11 @@ public class Issue {
         }
         if (hasMilestone) {
             rows.add(link(this.milestone.title, this.milestone.htmlUrl));
-            rows.add(escape(DTF.format(Instant.parse(this.milestone.dueOn))));
+            if (this.milestone.dueOn != null) {
+                rows.add(escape(DTF.format(Instant.parse(this.milestone.dueOn))));
+            } else {
+                rows.add("-");
+            }
         }
         metadata.addTableRow(rows.toArray());
         metadata.closeTable().closeDropDown();

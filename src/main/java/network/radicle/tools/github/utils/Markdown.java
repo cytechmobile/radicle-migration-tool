@@ -45,7 +45,8 @@ public class Markdown {
     }
 
     public static String link(String text, String url) {
-        return "[" + text + " ](" + url + ")";
+        var title = Strings.isNullOrEmpty(text) ? url : text;
+        return "[" + title + " ](" + url + ")";
     }
 
     public static String bold(String text) {
