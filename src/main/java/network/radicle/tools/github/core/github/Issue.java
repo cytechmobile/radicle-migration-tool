@@ -88,7 +88,7 @@ public class Issue {
         var meta = getMeta();
         issue.description = Strings.isNullOrEmpty(meta) ?
                 Strings.nullToEmpty(this.body) :
-                meta + "<br/>" +  Strings.nullToEmpty(this.body);
+                meta + "<br/>" + "\n\n" +  Strings.nullToEmpty(this.body);
         issue.tags = this.labels != null ?
                 this.labels.stream().map(l -> l.name).collect(Collectors.toList()) :
                 List.of();
