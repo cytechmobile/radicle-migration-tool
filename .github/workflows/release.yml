@@ -67,6 +67,7 @@ jobs:
             --generate-notes
 
   releaseDockerImage:
+    needs: releaseJavaBinary
     name: Release Docker Image
     runs-on: ubuntu-latest
     steps:
@@ -116,7 +117,7 @@ jobs:
           docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"        
 
   releaseNativeBinaries:
-    needs: releaseJavaBinary
+    needs: releaseDockerImage
     name: Release Native Binary
     runs-on: ${{ matrix.os }}
     strategy:
