@@ -40,14 +40,14 @@ public class FileStorageService {
     }
 
     public String getProperty(String key) {
-        if (!isInitialized()){
+        if (!isInitialized()) {
             return null;
         }
         return properties.getProperty(key);
     }
 
     public void setProperty(String key, String value) {
-        if (!isInitialized()){
+        if (!isInitialized()) {
             return;
         }
         try {
