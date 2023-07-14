@@ -114,7 +114,9 @@ jobs:
           # push image to github containers registry 
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
           docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
-          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"        
+          docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:latest"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:latest"        
 
   releaseNativeBinaries:
     needs: releaseDockerImage
