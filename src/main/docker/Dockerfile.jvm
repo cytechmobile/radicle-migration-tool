@@ -1,0 +1,12 @@
+FROM amazoncorretto:17-alpine
+ENV SSH_AUTH_SOCK="/ssh-agent"
+ENV RADICLE_API_URL="http://172.17.0.1:8080/api"
+
+RUN apk --no-cache add wget curl
+RUN wget https://radicle.xyz/install && chmod +x install && ./install && cp ~/.radicle/bin/rad /bin/
+
+COPY ./target/*-runner.jar /root/app.jar
+
+WORKDIR /root
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
   push:
-    branches: [ main, feature/incrementalMigrations ]
+    branches: [ main, feature/eventsAndMilestones ]
 
 # By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
 # With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
@@ -66,6 +66,25 @@ jobs:
             --title "v${{ env.VERSION }}" \
             --generate-notes
 
+        # Create the docker image
+      - name: Build Docker Image
+        if: success()
+        run: ./mvnw package -Pdocker
+      - name: Push Docker Image
+        if: success()
+        env:
+          IMAGE_NAME: ${{ github.repository }}
+          IMAGE_VERSION: ${{ env.VERSION }}
+          REGISTRY_PASS: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_NAME: ghcr.io
+        run: |
+          set -x
+          # push image to github containers registry 
+          echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
+          docker tag "${IMAGE_NAME}" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+
   releaseNativeBinaries:
     needs: releaseJavaBinary
     name: Release Native Binary
@@ -120,7 +139,7 @@ jobs:
 
       - name: Build Native Executable
         shell: bash
-        run: eval "${MAVEN_COMMAND} package -Pnative"
+        run: eval "${MAVEN_COMMAND} verify -Pnative"
 
       - name: Upload Native Executable To Draft Release
         shell: bash
