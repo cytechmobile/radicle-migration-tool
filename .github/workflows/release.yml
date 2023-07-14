@@ -66,6 +66,36 @@ jobs:
             --title "v${{ env.VERSION }}" \
             --generate-notes
 
+  releaseDockerImage:
+    name: Release Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        run: |
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
+
         # Create the docker image
       - name: Build Docker Image
         if: success()
@@ -82,8 +112,8 @@ jobs:
           set -x
           # push image to github containers registry 
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
-          docker tag "${IMAGE_NAME}" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
-          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"        
 
   releaseNativeBinaries:
     needs: releaseJavaBinary
