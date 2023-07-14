@@ -14,6 +14,7 @@ public class FileStorageServiceTest {
         var value = UUID.randomUUID().toString();
 
         var service = new FileStorageService();
+        service.path = "store.properties";
         service.init();
         service.setProperty(name, value);
         service.init();
