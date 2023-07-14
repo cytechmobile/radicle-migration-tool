@@ -94,15 +94,13 @@ public class Command implements Runnable {
     @CommandLine.Option(
             names = {"-fm", "--filter-milestone"},
             defaultValue = "${FILTER_MILESTONE}",
-            description = "Migrate issues belonging to the given milestone number. If the string * is passed, " +
-                    "issues with any milestone will be migrated (example: 3).")
+            description = "Migrate issues belonging to the given milestone number (example: 3).")
     Integer fMilestone;
 
     @CommandLine.Option(
             names = {"-fa", "--filter-assignee"},
             defaultValue = "${FILTER_ASSIGNEE}",
-            description = "Migrate issues assigned to the given user name. " +
-                    "Pass * for migrating issues assigned to any user.")
+            description = "Migrate issues assigned to the given user name. ")
     String fAssignee;
 
     @CommandLine.Option(

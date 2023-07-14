@@ -2,6 +2,7 @@ package network.radicle.tools.github.services;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +20,12 @@ public class FileStorageService {
     private Properties properties;
     private Path configFile;
 
+    @ConfigProperty(name = "storage.file.path")
+    String path;
+
     @PostConstruct
     public void init() {
-        configFile = Path.of("config.properties");
+        configFile = Path.of(path);
         try {
             if (!Files.exists(configFile)) {
                 Files.createFile(configFile);
@@ -54,7 +58,7 @@ public class FileStorageService {
             properties.setProperty(key, value);
             properties.store(new BufferedWriter(new FileWriter(configFile.toFile())), null);
         } catch (IOException e) {
-            logger.warn("Failed to persist the config.properties file: {}", e.getMessage());
+            logger.warn("Failed to persist the {} file: {}", configFile.toAbsolutePath(), e.getMessage());
         }
     }
 }
