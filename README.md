@@ -28,10 +28,10 @@ radicle-github-migrate
         <li><a href="#jar-binary">JAR Binary</a></li>
         <li><a href="#native-binaries">Native Binaries</a></li>
         <li><a href="#docker-image">Docker Image</a></li>
-        <li><a href="#pre-build-binaries">Pre-built binaries</a></li>
+        <li><a href="#pre-built-binaries">Pre-built binaries</a></li>
       </ul>
     </li>
-    <li><a href="#building-from-scource">Building from source</a></li>
+    <li><a href="#building-from-source">Building from source</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
