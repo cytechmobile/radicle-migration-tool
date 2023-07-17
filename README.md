@@ -14,30 +14,16 @@ The target rad environment must have a version `0.8.0` rad Command Line Interfac
 
 This tool is available under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-### Features
+# Features
 The tool offers several important features, including:
 * It enables the migration of all GitHub issues from the source repository in a single run.
 * It migrates essential information such as the `Title`, `Description`, `Status`, `Labels`, `Comments`, `Events`, and `Milestone` details.
 * Any additional information that doesn't fit within the Issue model is preserved in a dedicated `GitHub Metadata` section, along with references to the original repository
 * It supports incremental migration, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
-* It provides various filtering options to simplify the issue migration process:
-  * Issues created after a specified time.
-  * Issues with specific labels.
-  * Issues in a particular state.
-  * Issues belonging to a given milestone number.
-  * Issues created by a specific user.
-  * Issues assigned to a particular user.
+* It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
 * It is available in different binary forms, providing flexibility in how it can be utilized.
 
-### Important Notes 
-Since the Issue model and HTTP API in Radicle are currently simpler compared to GitHub, we have implemented the following alternative solutions / adaptations:
-* We have included a special `GitHub Metadata` section at the beginning of the `Description` and each `Comment` of the Radicle Issue. This section contains extra information and links to the original GitHub Issue, presented in a table format with columns such as `Issue Number`, `Created On`, `Created By`, `Assignees`, `Milestone`, and `Due By`.
-* GitHub `Events` are migrated as Radicle `Comments`.
-* GitHub `Milestones` are migrated as Radicle `Tags`. Additional information can be found in the `GitHub Metadata` section in the `Description` of each Radicle `Issue` (if there is any).
-* The user who runs the tool will be listed as the `Creator` of all Radicle issues.
-* Any links to images within the `Description` and `Comments` of GitHub Issues will still point to GitHub's servers. This means that images will display correctly for public GitHub repositories. However, for private repositories, since authorization is required, you will need to copy the source URL and access it through your browser.
-
-### Command-line interface
+# Command-line interface
 ```bash 
 Usage: radicle-github-migrate issues [-gv=<gVersion>] [-gu=<gUrl>] -gr=<gRepo> -go=<gOwner> -gt [-rv=<rVersion>] [-ru=<rUrl>] -rp=<rProject> [-fs=<fSince>] [-fl=<fLabels>] [-ft=<fState>] [-fm=<fMilestone>] [-fa=<fAssignee>] [-fc=<fCreator>] 
 
@@ -58,7 +44,7 @@ Migrate issues from a GitHub repository to a Radicle project.
       -fa, --filter-assignee=<fAssignee>    Migrate issues assigned to the given user name.
       -fc, --filter-creator=<fCreator>      Migrate issues created by the given user name.
 ```
-### Requirements
+# Requirements
 To use this application, you'll need to fulfill some common requirements, as well as specific requirements based on the binary you choose:
 * A GitHub account with a personal access token
 * The `rad` Command Line Interface (CLI) tool installed, preferably version 0.8.0 or later. You can find installation details [here](https://github.com/radicle-dev/heartwood). To check the version, run `rad --version`.
@@ -67,18 +53,26 @@ To use this application, you'll need to fulfill some common requirements, as wel
 * If running the JAR binary, ensure that you have Java 17 or a later version installed on your machine.
 * If using the Docker image, make sure that the Docker daemon is up and running on your machine.
 
-### JAR Binary
+# Important Notes 
+Since the Issue model and HTTP API in Radicle are currently simpler compared to GitHub, we have implemented the following alternative solutions / adaptations:
+* We have included a special `GitHub Metadata` section at the beginning of the `Description` and each `Comment` of the Radicle Issue. This section contains extra information and links to the original GitHub Issue, presented in a table format with columns such as `Issue Number`, `Created On`, `Created By`, `Assignees`, `Milestone`, and `Due By`.
+* GitHub `Events` are migrated as Radicle `Comments`.
+* GitHub `Milestones` are migrated as Radicle `Tags`. Additional information can be found in the `GitHub Metadata` section in the `Description` of each Radicle `Issue` (if there is any).
+* The user who runs the tool will be listed as the `Creator` of all Radicle issues.
+* Any links to images within the `Description` and `Comments` of GitHub Issues will still point to GitHub's servers. This means that images will display correctly for public GitHub repositories. However, for private repositories, since authorization is required, you will need to copy the source URL and access it through your browser.
+
+# JAR Binary
 If you intend to use a specific version of the JAR binary (e.g., 0.1.0), execute the following command:
 ```bash
 java -jar radicle-github-migrate-0.1.0.jar issues
 ```
 
-### Native Binaries
+# Native Binaries
 If you intend to use one of the native builds, you need to execute the corresponding native binary. For example, if you have downloaded the binary for Ubuntu, you should execute it by running the following command:
 ```bash 
 ./radicle-github-migrate-0.1.0-ubuntu-latest issues
 ```
-### Docker Image
+# Docker Image
 If you intend to use the Docker image, please follow the instructions provided below:
 
 ```shell
@@ -100,7 +94,7 @@ The image assumes that your `radicle-httpd` service runs by default at `http://1
 
 Lastly, you have the option to pass any environment variable using the -e option of the docker run command. For example: `docker run -e LOG_LEVEL=DEBUG`.
 
-### Environment Variables
+# Environment Variables
 You can pass any of the command line options via environment variables. Here is the complete list of the supported environment variables:
 * GITHUB_API_VERSION: The version of the GitHub REST API (default 2022-11-28)
 * GITHUB_API_URL: The base url of the GitHub REST API (default https://api.github.com)
@@ -125,7 +119,7 @@ For example, to run the command in DEBUG mode, you can execute the following com
 LOG_LEVEL=DEBUG java -jar radicle-github-migrate-0.1.0.jar issues
 ```
 
-### Building from source
+# Building from source
 To build the binary from source code, follow these steps:
 1.  Clone the repository from GitHub:
 ```shell
@@ -157,5 +151,5 @@ To build a docker image in Unix run:
 $ ./mvnw package -pdocker
 ```
 
-### Downloading pre-built binaries
+# Downloading pre-built binaries
 Pre-built binaries can be downloaded from the project's GitHub [releases page](https://github.com/cytechmobile/radicle-github-migrate/releases). Choose the appropriate release for your operating system and download the associated JAR or executable file.
