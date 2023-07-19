@@ -1,7 +1,16 @@
 # radicle-github-migrate Changelog
 
-## 0.1.0 - 2023-05-11
+## 0.2.0 - 2023-07-20
+### Features
+* Added support for incremental migrations, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
+* Added support for migrating important GitHub Events
+* Added support for migrating GitHub Milestones
+* Added support for a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
+* Added a special `GitHub Metadata` section. Any additional information that doesn't fit within the Issue model is preserved in that section, along with references to the original repository
+* Added support for running the migration tool in the form of a docker container
+* Added a `--dry-run` option allows users to run the whole migration process without actually creating the issues in the target Radicle project
 
+## 0.1.0 - 2023-05-11
 ### Features
 * Migrate GitHub issues to a Radicle project (supported attributes `title`, `description`, `tags`, `state`, `comments`).
 * Annotate migrated issues and comments with GitHub metadata (`owner`, `assignees`, `creation date`)
