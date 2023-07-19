@@ -112,7 +112,10 @@ public class MigrationService extends AbstractMigrationService {
                     page++;
                 }
             }
-            setLastRun(Instant.now());
+
+            if (!config.getRadicle().dryRun()) {
+                setLastRun(Instant.now());
+            }
 
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
