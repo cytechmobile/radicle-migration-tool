@@ -53,7 +53,7 @@ public class Config {
                     '}';
         }
     }
-    public record RadicleConfig(URL url, String version, String project) { }
+    public record RadicleConfig(URL url, String version, String project, Boolean dryRun) { }
 
     public record Filters(Instant since, String labels, State state, Integer milestone, String assignee,
                           String creator) {

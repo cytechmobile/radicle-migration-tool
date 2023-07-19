@@ -73,6 +73,10 @@ public class RadicleClient implements IRadicleClient {
         config.getRadicle().project() + "/issues";
 
         logger.trace("Creating radicle issue {}", issue);
+        if (config.getRadicle().dryRun()) {
+            return null;
+        }
+
         try (var resp = client.target(url).request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))
                 .post(Entity.json(issue))) {
@@ -93,6 +97,10 @@ public class RadicleClient implements IRadicleClient {
                 config.getRadicle().project() + "/issues/" + id;
 
         logger.trace("Updating radicle issue {} by using action {}", id, action.type);
+        if (config.getRadicle().dryRun()) {
+            return true;
+        }
+
         try (var resp = client.target(url)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(session.id))

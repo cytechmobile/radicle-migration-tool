@@ -109,6 +109,12 @@ public class Command implements Runnable {
             description = "Migrate issues created by the given user name.")
     String fCreator;
 
+    @CommandLine.Option(
+            names = {"-dr", "--dry-run"},
+            defaultValue = "${DRY_RUN:false}",
+            description = "Run the whole migration process without actually creating the issues in the target Radicle project..")
+    boolean dryRun;
+
     public enum State { open, closed, all }
 
     @Inject MigrationService service;
@@ -121,7 +127,7 @@ public class Command implements Runnable {
     private void loadConfiguration() {
         var filters = new Filters(fSince, fLabels, fState, fMilestone, fAssignee, fCreator);
         config.setGithub(new GitHubConfig(gToken, gUrl, gVersion, gOwner, gRepo, filters, PAGE_SIZE));
-        config.setRadicle(new RadicleConfig(rUrl, rVersion, rProject));
+        config.setRadicle(new RadicleConfig(rUrl, rVersion, rProject, dryRun));
     }
 
 }

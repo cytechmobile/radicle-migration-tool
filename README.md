@@ -79,6 +79,7 @@ Migrate issues from a GitHub repository to a Radicle project.
       -fm, --filter-milestone=<fMilestone>  Migrate issues belonging to the given milestone number (example: 3).
       -fa, --filter-assignee=<fAssignee>    Migrate issues assigned to the given user name.
       -fc, --filter-creator=<fCreator>      Migrate issues created by the given user name.
+      -dr, --dry-run                        Run the whole migration process without actually creating the issues in the target Radicle project.
 ```
 ### Requirements
 To use this application, you'll need to fulfill some common requirements, as well as specific requirements based on the binary you choose:
@@ -115,6 +116,7 @@ You can pass any of the command line options via environment variables. Here is 
 * FILTER_CREATOR: Migrate issues created by the given username.
 * LOG_LEVEL: The log level of the application (default INFO)
 * STORAGE_FILE_PATH: The path of the storage properties files (default store.properties)
+* DRY_RUN: Run the whole migration process without actually creating the issues in the target Radicle project.
 
 For example, to run the command in DEBUG mode, you can execute the following command:
 
