@@ -7,7 +7,7 @@
   <version>0.2.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.12.0</checkstyle-tools.version>
+    <checkstyle-tools.version>10.12.1</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,7 +15,7 @@
     <quarkus.package.type>uber-jar</quarkus.package.type>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.1.2.Final</quarkus.platform.version>
+    <quarkus.platform.version>3.2.0.Final</quarkus.platform.version>
     <skipTests>false</skipTests>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
