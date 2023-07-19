@@ -154,6 +154,7 @@ public class Event extends Timeline {
                 if (commit != null) {
                     var message = this.commit.metadata.message.split("\n")[0];
                     body.add("in");
+                    body.add(this.commit.sha);
                     body.add(link(bold(message), this.commit.htmlUrl));
                 }
             }
@@ -171,6 +172,7 @@ public class Event extends Timeline {
             case MENTIONED -> body.add("was mentioned");
             case REFERENCED -> {
                 body.add("added the commit");
+                body.add(this.commit.sha);
                 var message = this.commit.metadata.message.split("\n")[0];
                 body.add(link(bold(message), this.commit.htmlUrl));
                 body.add("that referenced this issue");
