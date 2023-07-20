@@ -7,19 +7,25 @@ import jakarta.ws.rs.InternalServerErrorException;
 import network.radicle.tools.github.Config;
 import network.radicle.tools.github.clients.IGitHubClient;
 import network.radicle.tools.github.clients.IRadicleClient;
+import network.radicle.tools.github.core.github.Comment;
+import network.radicle.tools.github.core.github.Event;
 import network.radicle.tools.github.core.github.Issue;
+import network.radicle.tools.github.core.github.Timeline;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 @ApplicationScoped
-public class MigrationService {
+public class MigrationService extends AbstractMigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationService.class);
-    private static final String DATE_PATTERN_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Inject IGitHubClient github;
     @Inject IRadicleClient radicle;
@@ -28,24 +34,37 @@ public class MigrationService {
     public boolean migrateIssues() {
         var page = 1;
         var hasMoreIssues = true;
-        var total = 0;
+        var processedCount = 0;
+        var commentsCount = 0;
+        var eventsCount = 0;
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
+            var filters = config.getGithub().filters();
+            if (filters.since() == null) {
+                filters = filters.withSince(getLastRun());
+            }
+            logger.info("Migration started with filters: {}", filters);
+
             var session = radicle.createSession();
-            logger.info("Created radicle session: {}", session.id);
+            if (session == null) {
+                logger.error("Session could not get authenticated.");
+                logger.info("Hint: To setup your radicle profile and register your key with the ssh-agent, run `rad auth`.");
+                return false;
+            }
+
+            logger.debug("Radicle session created: {}", session.id);
+
             while (hasMoreIssues) {
                 List<Issue> issues = List.of();
                 try {
-                    issues = github.getIssues(page);
-                    var batchSize = issues.size();
-                    logger.debug("Migrating page: {} with size: {}", page, batchSize);
+                    issues = github.getIssues(page, filters);
                     for (var issue : issues) {
-                        //ignore pull requests
-                        if (issue.pullRequest != null) {
+                        //ignore pull requests and issues that created before the since filter
+                        if (issue.pullRequest != null || issue.createdAt.isBefore(filters.since())) {
                             continue;
                         }
-                        total++;
+                        processedCount++;
 
                         var radIssue = issue.toRadicle();
                         try {
@@ -55,41 +74,90 @@ public class MigrationService {
                                 radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
                             }
 
-                            // process issue's comments
-                            var commentsPage = 1;
-                            var hasMoreComments = true;
-                            while (hasMoreComments) {
-                                var comments = github.getComments(issue.number, commentsPage);
-                                for (var comment : comments) {
-                                    radicle.updateIssue(session, id, new CommentAction(comment.getBodyWithMeta()));
+                            var comments = getCommentsFor(issue);
+                            var events = getEventsFor(issue, true);
+
+                            //now put everything in chronological order
+                            var timeline = Stream.concat(comments.stream(), events.stream())
+                                    .sorted(Comparator.comparing(Timeline::getCreatedAt))
+                                    .toList();
+
+                            commentsCount += comments.size();
+                            eventsCount += events.size();
+
+                            for (var event : timeline) {
+                                //fetch any extra information for specific event types
+                                if (Event.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
+                                        Event.Type.CLOSED.value.equalsIgnoreCase(event.getType())) {
+                                    var e = ((Event) event);
+                                    if (e.commitUrl != null) {
+                                        e.commit = github.getCommit(e.commitId);
+                                    }
                                 }
-                                hasMoreComments = config.getGithub().pageSize() == comments.size();
-                                commentsPage++;
+                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata()));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
-                            logger.warn("Failed to migrate issue: {}, error: {}", issue.number, ex.getMessage());
+                            logger.warn("Failed to migrate issue: {}. Error: {}", issue.number, ex.getMessage());
                         }
                     }
-                    logger.info("Total processed until now: {}", total);
+                    logger.info("Processed issues: {}, comments: {}, events: {} ...", processedCount, commentsCount, eventsCount);
+
                     hasMoreIssues = config.getGithub().pageSize() == issues.size();
                     page++;
                 } catch (InternalServerErrorException | BadRequestException ex) {
                     var ids = issues.stream().map(i -> i.number).toList();
                     partiallyOrNonMigratedIssues.addAll(ids);
-                    logger.warn("Failed to migrate issues: {}, error: {}", ids, ex.getMessage());
+                    logger.warn("Failed to migrate issues: {}. Error: {}", ids, ex.getMessage());
                     page++;
                 }
             }
-            logger.info("Total processed issues: {}", total);
-            if (partiallyOrNonMigratedIssues.size() > 0) {
+
+            if (!config.getRadicle().dryRun()) {
+                setLastRun(Instant.now());
+            }
+
+            if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }
+            logger.info("Totally processed issues: {}, comments: {}, events: {}", processedCount, commentsCount, eventsCount);
             return true;
         } catch (Exception ex) {
-            logger.error("Migration failed: {}", ex.getMessage());
+            logger.error("Migration failed", ex);
             return false;
         }
+    }
+
+    private List<Comment> getCommentsFor(Issue issue) throws Exception {
+        var page = 1;
+        var hasMore = true;
+        var commentsList = new ArrayList<Comment>();
+        while (hasMore) {
+            var comments = github.getComments(issue.number, page);
+            commentsList.addAll(comments);
+            hasMore = config.getGithub().pageSize() == comments.size();
+            page++;
+        }
+        return commentsList;
+    }
+
+    private List<Event> getEventsFor(Issue issue, boolean timeline) throws Exception {
+        var page = 1;
+        var hasMore = true;
+        var eventsList = new ArrayList<Event>();
+        while (hasMore) {
+            var events = github.getEvents(issue.number, page, timeline);
+            eventsList.addAll(events.stream().filter(e -> Event.Type.isValid(e.event)).toList());
+            hasMore = config.getGithub().pageSize() == events.size();
+            page++;
+        }
+        return eventsList;
+    }
+
+    public String getLastRunPropertyName() {
+        var radProject = config.getRadicle().project().replace("rad:", "");
+        return "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
+                ".lastRunInMillis";
     }
 
 }

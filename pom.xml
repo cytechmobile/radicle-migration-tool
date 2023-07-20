@@ -4,23 +4,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>network.radicle.tools.github</groupId>
   <artifactId>radicle-github-migrate</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <properties>
+    <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
+    <checkstyle-tools.version>10.12.1</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+    <quarkus.package.type>uber-jar</quarkus.package.type>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.2.1.Final</quarkus.platform.version>
-    <quarkus.package.type>uber-jar</quarkus.package.type>
-
-    <surefire-plugin.version>3.1.2</surefire-plugin.version>
-    <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.12.1</checkstyle-tools.version>
-
     <skipTests>false</skipTests>
+    <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -70,8 +67,20 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-picocli</artifactId>
     </dependency>
-
-    <!-- test dependencies -->
+    <dependency>
+      <groupId>com.sshtools</groupId>
+      <artifactId>maverick-sshagent</artifactId>
+      <version>3.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>net.steppschuh.markdowngenerator</groupId>
+      <artifactId>markdowngenerator</artifactId>
+      <version>1.3.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-docker</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
@@ -98,20 +107,12 @@
       <artifactId>postgresql</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${checkstyle-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle-tools.version}</version>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <id>validate</id>
@@ -130,6 +131,13 @@
             </configuration>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle-tools.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
@@ -140,9 +148,15 @@
           <execution>
             <goals>
               <goal>build</goal>
-              <goal >generate-code</goal>
+              <goal>generate-code</goal>
               <goal>generate-code-tests</goal>
             </goals>
+            <configuration>
+              <ignoredEntries>
+                <ignoredEntry>META-INF/AL2.0</ignoredEntry>
+                <ignoredEntry>META-INF/LGPL2.1</ignoredEntry>
+              </ignoredEntries>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -163,11 +177,6 @@
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
-        <configuration>
-          <environmentVariables>
-            <GITHUB_TOKEN>testGitHubToken</GITHUB_TOKEN>
-          </environmentVariables>
-        </configuration>
         <executions>
           <execution>
             <goals>
@@ -176,6 +185,11 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <environmentVariables>
+            <GITHUB_TOKEN>testGitHubToken</GITHUB_TOKEN>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -211,7 +225,20 @@
         </plugins>
       </build>
       <properties>
+        <quarkus.native.additional-build-args>--initialize-at-run-time=com.sun.jna.platform.win32.Kernel32</quarkus.native.additional-build-args>
         <quarkus.package.type>native</quarkus.package.type>
+      </properties>
+    </profile>
+    <profile>
+      <id>docker</id>
+      <activation>
+        <property>
+          <name>docker</name>
+        </property>
+      </activation>
+      <properties>
+        <quarkus.container-image.build>true</quarkus.container-image.build>
+        <quarkus.container-image.tag>latest</quarkus.container-image.tag>
       </properties>
     </profile>
   </profiles>

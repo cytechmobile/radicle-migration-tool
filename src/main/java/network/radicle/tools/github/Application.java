@@ -13,6 +13,9 @@ public class Application implements QuarkusApplication {
 
     @Override
     public int run(String... args) {
-        return new CommandLine(new QuarkusCommand()).addSubcommand(issuesCommand).execute(args);
+        return new CommandLine(new QuarkusCommand())
+                .addSubcommand(issuesCommand)
+                .setUsageHelpAutoWidth(true)
+                .execute(args);
     }
 }

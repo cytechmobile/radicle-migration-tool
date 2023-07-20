@@ -35,7 +35,6 @@
     "locked": false,
     "assignee": null,
     "assignees": [],
-    "milestone": null,
     "comments": 0,
     "created_at": "2023-02-16T08:49:49Z",
     "updated_at": "2023-02-16T08:52:17Z",
@@ -103,7 +102,9 @@
     "locked": false,
     "assignee": null,
     "assignees": [],
-    "milestone": null,
+    "milestone": {
+      "number": 1
+    },
     "comments": 1,
     "created_at": "2022-06-10T00:33:04Z",
     "updated_at": "2022-06-10T02:55:35Z",
@@ -171,13 +172,6 @@
     "author_association": "NONE",
     "active_lock_reason": null,
     "draft": false,
-    "pull_request": {
-      "url": "https://api.github.com/repos/testowner/testrepo/pulls/5",
-      "html_url": "https://github.com/testowner/testrepo/pull/5",
-      "diff_url": "https://github.com/testowner/testrepo/pull/5.diff",
-      "patch_url": "https://github.com/testowner/testrepo/pull/5.patch",
-      "merged_at": "2021-12-08T17:22:22Z"
-    },
     "body": "The plugin is missing the latest available toolbar buttons in Jitsi Meet like the select background button. This PR adds all the missing toolbar and setting options in the plugin.",
     "reactions": {
       "url": "https://api.github.com/repos/testowner/testrepo/issues/5/reactions",
@@ -226,7 +220,14 @@
       "type": "User",
       "site_admin": false
     },
-    "labels": [],
+    "labels": [
+      {
+        "name": "feature"
+      },
+      {
+        "name": "release 1.0"
+      }
+    ],
     "state": "closed",
     "locked": false,
     "assignee": null,
@@ -239,13 +240,6 @@
     "author_association": "CONTRIBUTOR",
     "active_lock_reason": null,
     "draft": false,
-    "pull_request": {
-      "url": "https://api.github.com/repos/testowner/testrepo/pulls/4",
-      "html_url": "https://github.com/testowner/testrepo/pull/4",
-      "diff_url": "https://github.com/testowner/testrepo/pull/4.diff",
-      "patch_url": "https://github.com/testowner/testrepo/pull/4.patch",
-      "merged_at": "2021-12-08T17:20:52Z"
-    },
     "body": "This commit adds a filter for setting the value of $load_scripts in enqueue_scripts().\r\n\r\n\r\n#### Personal usage example: calling testrepo from a custom shortcode\r\nI have a `[custom-shortcode]` which calls `do_shortcode('[testrepo room=example]')`. In the current version it doesn't work, because $load_scripts get falsy, so the scripts aren't loaded. Using this new filter, it could be resolved with  the following.\r\n\r\n```php\r\nadd_filter( 'testrepo_enqueue_scripts_load_scripts', 'set_testrepo_load_scripts' );\r\n                                                                                                                                                                                            \r\nfunction set_testrepo_load_scripts($load_scripts) {\r\n        if ( is_page() || is_single() ) {\r\n                $post = get_post();\r\n                if ( $post && has_shortcode( $post->post_content, 'custom-shortcode' ) ) {\r\n                        $load_scripts = true;\r\n                }\r\n        }\r\n\r\n        return $load_scripts;\r\n}           \r\n```\r\nI'm mentioning this usage because I saw other people have been trying to do this with no success, but there are other possible usages for this filter, sure.",
     "reactions": {
       "url": "https://api.github.com/repos/testowner/testrepo/issues/4/reactions",
@@ -294,7 +288,14 @@
       "type": "User",
       "site_admin": false
     },
-    "labels": [],
+    "labels": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "release 1.0"
+      }
+    ],
     "state": "open",
     "locked": false,
     "assignee": null,
@@ -367,13 +368,6 @@
     "author_association": "NONE",
     "active_lock_reason": null,
     "draft": false,
-    "pull_request": {
-      "url": "https://api.github.com/repos/testowner/testrepo/pulls/2",
-      "html_url": "https://github.com/testowner/testrepo/pull/2",
-      "diff_url": "https://github.com/testowner/testrepo/pull/2.diff",
-      "patch_url": "https://github.com/testowner/testrepo/pull/2.patch",
-      "merged_at": null
-    },
     "body": "Fixes #1 ",
     "reactions": {
       "url": "https://api.github.com/repos/testowner/testrepo/issues/2/reactions",
@@ -425,7 +419,9 @@
     "labels": [],
     "state": "closed",
     "locked": false,
-    "assignee": null,
+    "assignee": {
+      "login": "testuser"
+    },
     "assignees": [],
     "milestone": null,
     "comments": 1,

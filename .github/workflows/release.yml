@@ -30,6 +30,18 @@ jobs:
           distribution: corretto
           java-version: 17
 
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
+
       - name: Build Java Executable
         run: ./mvnw package
 
@@ -54,20 +66,80 @@ jobs:
             --title "v${{ env.VERSION }}" \
             --generate-notes
 
-  releaseNativeBinaries:
+  releaseDockerImage:
     needs: releaseJavaBinary
-    name: Release Native Binary
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: Release Docker Image
+    runs-on: ubuntu-latest
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v3
 
       - name: Setup Environment
+        run: |
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
+
+        # Create the docker image
+      - name: Build Docker Image
+        if: success()
+        run: ./mvnw package -Pdocker
+      - name: Push Docker Image
+        if: success()
+        env:
+          IMAGE_NAME: ${{ github.repository }}
+          IMAGE_VERSION: ${{ env.VERSION }}
+          REGISTRY_PASS: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_NAME: ghcr.io
+        run: |
+          set -x
+          # push image to github containers registry 
+          echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
+          docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:latest"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:latest"        
+
+  releaseNativeBinaries:
+    needs: releaseDockerImage
+    name: Release Native Binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      - name: Setup Environment
         shell: bash
         run: |
+          echo "MVN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true --batch-mode --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true" >> $GITHUB_ENV
+          
           MAVEN_COMMAND="$(if [ "$RUNNER_OS" == "Windows" ]; then echo "./mvnw.cmd"; else echo "./mvnw"; fi)"
           VERSION=$(eval "$MAVEN_COMMAND help:evaluate -Dexpression=project.version -q -DforceStdout")
           ASSET_SUFFIX="$(if [ "$RUNNER_OS" == "Windows" ]; then echo ".exe"; else echo ""; fi)"
@@ -76,11 +148,17 @@ jobs:
           echo "MAVEN_COMMAND=$MAVEN_COMMAND" >> $GITHUB_ENV
           echo "ASSET_SUFFIX=$ASSET_SUFFIX" >> $GITHUB_ENV
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: corretto
-          java-version: 17
+      # Start SSH Agent and add the private key
+      - name: Start SSH Agent and add the private key
+        env:
+          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
 
       - name: Setup GraalVM
         if: startsWith(matrix.os, 'macos-') || startsWith(matrix.os, 'windows-')
@@ -94,7 +172,7 @@ jobs:
 
       - name: Build Native Executable
         shell: bash
-        run: eval "${MAVEN_COMMAND} package -Pnative"
+        run: eval "${MAVEN_COMMAND} verify -Pnative"
 
       - name: Upload Native Executable To Draft Release
         shell: bash

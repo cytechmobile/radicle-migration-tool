@@ -16,6 +16,9 @@ public class Session {
     @JsonProperty("publicKey")
     public String publicKey;
 
+    @JsonProperty("signature")
+    public String signature;
+
     @JsonProperty("issuedAt")
     public Long issuedAt;
 
