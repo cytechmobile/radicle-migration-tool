@@ -7,7 +7,7 @@
   <version>0.2.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.12.1</checkstyle-tools.version>
+    <checkstyle-tools.version>10.12.2</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
