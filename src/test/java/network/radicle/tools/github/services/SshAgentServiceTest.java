@@ -7,9 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SshAgentServiceTest {
 
-    private final static String SESSION_ID = "GdPg6opLHgS9VBTdaV1ACESEc9wG2W68";
-    private final static String PUBLIC_KEY = "z6Mkf2deXEQBXenu829pKGcvSutjko6g7L6J4bapiBaJ1NYk";
-    private final static String SIGNATURE = "z5tCYabHbMxz3mSwBbhdHSxP7XZnZHQjAciHTYy6gGHTarUksye9grJR3rs9grYnUtZ7DE7woGQDLxUarvDioY7BM";
+    private final static String SESSION_ID = "tuOsGrjR8iqXBM3lLb4ACiDyLkKI1HFk";
+    private final static String PUBLIC_KEY = "z6MkkpfXb92R2pTibirh1fJkSVc6UtpJxrS8k8g3zNftsXL3";
+    private final static String SIGNATURE = "z3LwYFBFWbrMoVxPb5RUFsphmBK71amUKgBwSJT9pHgGmeRPCCUxdx8WhEWAjwQghRXqwYuPFx39wdb7bEB2SJpjC";
 
     @Test
     public void testSignSessionUsingTheLocalAgent() {
