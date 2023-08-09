@@ -1,5 +1,10 @@
 # radicle-github-migrate Changelog
 
+## 0.3.0 - 2023-08-09
+### Fixes
+* Renamed the `tags` field to `labels` in order to comply with the updated model of the `Radicle Issue`
+* Updated the `comment` action in order to comply with the updated endpoint of the Radicle HTTP API
+
 ## 0.2.0 - 2023-07-20
 ### Features
 * Added support for incremental migrations, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
