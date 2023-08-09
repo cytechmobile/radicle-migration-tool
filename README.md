@@ -96,7 +96,7 @@ To use this application, you'll need to fulfill some common requirements, as wel
 Since the Issue model and HTTP API in Radicle are currently simpler compared to GitHub, we have implemented the following alternative solutions / adaptations:
 * We have included a special `GitHub Metadata` section at the beginning of the `Description` and each `Comment` of the Radicle Issue. This section contains extra information and links to the original GitHub Issue, presented in a table format with columns such as `Issue Number`, `Created On`, `Created By`, `Assignees`, `Milestone`, and `Due By`.
 * GitHub `Events` are migrated as Radicle `Comments`.
-* GitHub `Milestones` are migrated as Radicle `Tags`. Additional information can be found in the `GitHub Metadata` section in the `Description` of each Radicle `Issue` (if there is any).
+* GitHub `Milestones` are migrated as Radicle `Labels`. Additional information can be found in the `GitHub Metadata` section in the `Description` of each Radicle `Issue` (if there is any).
 * The user who runs the tool will be listed as the `Creator` of all Radicle issues.
 * Any links to images within the `Description` and `Comments` of GitHub Issues will still point to GitHub's servers. This means that images will display correctly for public GitHub repositories. However, for private repositories, since authorization is required, you will need to copy the source URL and access it through your browser.
 
