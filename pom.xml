@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>network.radicle.tools.github</groupId>
   <artifactId>radicle-github-migrate</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
     <checkstyle-tools.version>10.12.2</checkstyle-tools.version>

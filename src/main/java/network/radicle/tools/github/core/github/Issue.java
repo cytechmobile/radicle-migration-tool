@@ -89,14 +89,14 @@ public class Issue {
         issue.description = Strings.isNullOrEmpty(meta) ?
                 Strings.nullToEmpty(this.body) :
                 meta + "<br/>" + "\n\n" +  Strings.nullToEmpty(this.body);
-        issue.tags = this.labels != null ?
+        issue.labels = this.labels != null ?
                 this.labels.stream().map(l -> l.name).collect(Collectors.toList()) :
                 List.of();
 
         if (this.milestone != null) {
-            var tags = new ArrayList<>(issue.tags);
-            tags.add(this.milestone.title);
-            issue.tags = tags;
+            var rLabels = new ArrayList<>(issue.labels);
+            rLabels.add(this.milestone.title);
+            issue.labels = rLabels;
         }
 
         var reason = "";

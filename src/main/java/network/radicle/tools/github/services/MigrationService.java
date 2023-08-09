@@ -94,7 +94,7 @@ public class MigrationService extends AbstractMigrationService {
                                         e.commit = github.getCommit(e.commitId);
                                     }
                                 }
-                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata()));
+                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata(), id));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);

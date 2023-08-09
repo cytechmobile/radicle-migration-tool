@@ -23,8 +23,8 @@ public class Issue {
     public State state;
     @JsonProperty("discussion")
     public List<Discussion> discussion;
-    @JsonProperty("tags")
-    public List<String> tags;
+    @JsonProperty("labels")
+    public List<String> labels;
 
     @Override
     public String toString() {
@@ -36,7 +36,7 @@ public class Issue {
                 ", description='" + description + '\'' +
                 ", state=" + state +
                 ", discussion=" + discussion +
-                ", tags=" + tags +
+                ", labels=" + labels +
                 '}';
     }
 }
