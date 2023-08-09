@@ -48,6 +48,8 @@ The target rad environment must have a version `0.8.0` rad Command Line Interfac
 
 This tool is available under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
+**Important Note:** Please note that since Radicle is still under active development, our functionality may require adjustments in the future to ensure compatibility.
+
 ### Features
 The tool offers several important features, including:
 * It enables the migration of all GitHub issues from the source repository in a single run.
