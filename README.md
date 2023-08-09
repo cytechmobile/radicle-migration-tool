@@ -194,7 +194,7 @@ This will generate the binary file in the `target` directory.
 
 To build a docker image in Unix run:
 ```shell
-$ ./mvnw package -pdocker
+$ ./mvnw package -Pdocker
 ```
 
 ## License
