@@ -26,7 +26,7 @@ class CommentActionTest {
             var seed = System.currentTimeMillis();
             var file = new File("src/test/resources/radicle/actions/comment.json");
             var action = IssueTest.MAPPER.readValue(file, CommentAction.class);
-            action.action.put("body", "" + seed);
+            action.body =  "" + seed;
             return action;
         } catch (Exception ex) {
             logger.error("caught error", ex);
