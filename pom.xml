@@ -242,6 +242,7 @@
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.tag>latest</quarkus.container-image.tag>
         <quarkus.docker.buildx.platform>${targetArchs}</quarkus.docker.buildx.platform>
+        <quarkus.docker.buildx.output>type=image</quarkus.docker.buildx.output>
       </properties>
     </profile>
   </profiles>
