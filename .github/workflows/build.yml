@@ -40,7 +40,7 @@ jobs:
       - name: build
         working-directory: './'
         run: |
-          ./mvnw verify
+          ./mvnw verify -DskipTests=false -Dmaven.test.skip=false
 
       - name: AutoMerge Dependabot PRs
         if: success() && github.actor == 'dependabot[bot]' && github.ref != 'refs/heads/main'
