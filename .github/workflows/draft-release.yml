@@ -100,7 +100,7 @@ jobs:
         # Create the docker image
       - name: Build Docker Image
         if: success()
-        run: ./mvnw package -Pdocker
+        run: ./mvnw package -Pdocker -DtargetArchs=linux/amd64,linux/arm64
       - name: Push Docker Image
         if: success()
         env:
