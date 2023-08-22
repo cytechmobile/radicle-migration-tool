@@ -49,7 +49,7 @@ public class Command implements Runnable {
             required = true,
             interactive = true,
             defaultValue = "${GITHUB_TOKEN}",
-            description = "Your GitHub personal access token.")
+            description = "Your GitHub personal access token (with `repo` scope or `read-only access` granted).")
     String gToken;
 
     @CommandLine.Option(
