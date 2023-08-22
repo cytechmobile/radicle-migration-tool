@@ -110,10 +110,8 @@ jobs:
           set -x
           # push image to github containers registry 
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
-          
           # Changing the default driver is mandatory for multi-arch builds
           docker buildx create --name multiarch --use
-          
          ./mvnw package -Pdocker -DdockerImageTag=draft -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerImagePush=true -DdockerImageRegistry="${REGISTRY_NAME}"
 
   releaseNativeBinaries:
