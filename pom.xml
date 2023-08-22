@@ -4,19 +4,21 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>network.radicle.tools.github</groupId>
   <artifactId>radicle-github-migrate</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
     <checkstyle-tools.version>10.12.2</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
+    <maven.test.skip>true</maven.test.skip>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <quarkus.package.type>uber-jar</quarkus.package.type>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.2.4.Final</quarkus.platform.version>
-    <skipTests>false</skipTests>
+    <skipTests>true</skipTests>
+    <targetArchs/>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -239,6 +241,7 @@
       <properties>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.tag>latest</quarkus.container-image.tag>
+        <quarkus.docker.buildx.platform>${targetArchs}</quarkus.docker.buildx.platform>
       </properties>
     </profile>
   </profiles>

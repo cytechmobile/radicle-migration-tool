@@ -1,5 +1,9 @@
 # radicle-github-migrate Changelog
 
+## 0.3.1 - 2023-08-22
+### Features
+* Added support for multi-arch docker binary. Current pre-built docker image supports linux/amd64 and linux/arm64.
+
 ## 0.3.0 - 2023-08-09
 ### Fixes
 * Renamed the `tags` field to `labels` in order to comply with the updated model of the `Radicle Issue`
