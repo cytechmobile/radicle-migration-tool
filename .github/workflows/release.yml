@@ -9,6 +9,11 @@ on:
         type: choice
         default: 'all'
         options: [ 'all', 'docker', 'native' ]
+      dockerTagLatest:
+        description: Select to tag the released docker image as latest.
+        required: false
+        type: boolean
+        default: true
 
 # By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
 # With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
@@ -117,6 +122,7 @@ jobs:
           REGISTRY_PASS: ${{ secrets.GITHUB_TOKEN }}
           REGISTRY_USER: ${{ github.actor }}
           REGISTRY_NAME: ghcr.io
+          DOCKER_TAG_LATEST: ${{github.event.inputs.dockerTagLatest}}
         run: |
           set -x
           # push image to github containers registry 
@@ -124,7 +130,10 @@ jobs:
           docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
           docker tag "runner/radicle-github-migrate" "${REGISTRY_NAME}/${IMAGE_NAME}:latest"
           docker push "${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}"
-          docker push "${REGISTRY_NAME}/${IMAGE_NAME}:latest"        
+          
+          if [[ "DOCKER_TAG_LATEST" == "true" ]]; then
+            docker push "${REGISTRY_NAME}/${IMAGE_NAME}:latest"
+          fi
 
   releaseNativeBinaries:
     if: github.event.inputs.binaries == 'all' || github.event.inputs.binaries == 'native'
