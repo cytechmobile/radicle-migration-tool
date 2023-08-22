@@ -97,13 +97,13 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
         # Create the docker image
       - name: Build Docker Image
         if: success()
-        run: ./mvnw package -Pdocker -DtargetArchs=linux/amd64,linux/arm64
+        run: |
+          # Changing the default driver is mandatory for multi-arch builds
+          docker buildx create --name multiarch --use
+          ./mvnw package -Pdocker -DtargetArchs=linux/amd64,linux/arm64
       - name: Push Docker Image
         if: success()
         env:
