@@ -71,7 +71,7 @@ Migrate issues from a GitHub repository to a Radicle project.
       -gu, --github-api-url=<gUrl>          The base url of the GitHub REST API (default: https://api.github.com).
       -gr, --github-repo=<gRepo>            The source GitHub repo.
       -go, --github-repo-owner=<gOwner>     The owner of the source GitHub repo.
-      -gt, --github-token                   Your GitHub personal access token.
+      -gt, --github-token                   Your GitHub personal access token (with repo scope or read-only access granted).
       -rv, --radicle-api-version=<rVersion> The version of the Radicle HTTP API (default: v1).
       -ru, --radicle-api-url=<rUrl>         The base url of Radicle HTTP API (default: http://localhost:8080/api).
       -rp, --radicle-project=<rProject>     The target Radicle project.
@@ -85,7 +85,7 @@ Migrate issues from a GitHub repository to a Radicle project.
 ```
 ### Requirements
 To use this application, you'll need to fulfill some common requirements, as well as specific requirements based on the binary you choose:
-* A GitHub account with a personal access token
+* A GitHub account with a Personal Access Token (PAT). Your PAT must grant you with `repo` scope - in case of a classic one - or with `read-only access` - in case of a fine-grained one. 
 * The `rad` Command Line Interface (CLI) tool installed, preferably version 0.8.0 or later. You can find installation details [here](https://github.com/radicle-dev/heartwood). To check the version, run `rad --version`.
 * A running instance of the Radicle HTTP daemon. Before starting the daemon, ensure that you have set the `RAD_PASSPHRASE` environment variable or executed the `rad auth` command in the same terminal. Refer to [this link](https://github.com/radicle-dev/heartwood/blob/master/radicle-cli/examples/rad-auth.md) for examples on how to use the `rad auth` command. To start the Radicle HTTP daemon, run `radicle-httpd`.
 * A Radicle-initialized Git repository. This will serve as your target Radicle project, where the issues will be migrated.
@@ -106,7 +106,7 @@ You can pass any of the command line options via environment variables. Here is 
 * GITHUB_API_URL: The base url of the GitHub REST API (default https://api.github.com)
 * GITHUB_REPO: The source GitHub repo
 * GITHUB_OWNER: The owner of the source GitHub repo
-* GITHUB_TOKEN: Your GitHub personal access token
+* GITHUB_TOKEN: Your GitHub personal access token (with `repo` scope or `read-only access` granted).
 * RADICLE_API_VERSION: The version of the Radicle HTTP API (default v1)
 * RADICLE_API_URL: The base url of Radicle HTTP API (default http://localhost:8080/api)
 * RADICLE_PROJECT: The target Radicle project
