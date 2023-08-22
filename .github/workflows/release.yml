@@ -2,8 +2,13 @@ name: Release
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
+    inputs:
+      binaries:
+        description: Select the binaries that you want to build
+        required: true
+        type: choice
+        default: 'all'
+        options: [ 'all', 'docker', 'native' ]
 
 # By setting up concurrency group using github.ref, we essentially instruct github to only run one workflow at a time per branch
 # With "cancel-in-progress: true" we also specify that existing/running workflows for that branch will be canceled
@@ -13,6 +18,7 @@ concurrency:
 
 jobs:
   releaseJavaBinary:
+    if: github.event.inputs.binaries == 'all' || github.event.inputs.binaries == 'native'
     name: Release Java Binary
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +73,7 @@ jobs:
             --generate-notes
 
   releaseDockerImage:
+    if: github.event.inputs.binaries == 'all' || github.event.inputs.binaries == 'docker'
     needs: releaseJavaBinary
     name: Release Docker Image
     runs-on: ubuntu-latest
@@ -96,11 +103,12 @@ jobs:
           echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
-
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
         # Create the docker image
       - name: Build Docker Image
         if: success()
-        run: ./mvnw package -Pdocker
+        run: ./mvnw package -Pdocker -DtargetArchs=linux/amd64,linux/arm64
       - name: Push Docker Image
         if: success()
         env:
@@ -119,6 +127,7 @@ jobs:
           docker push "${REGISTRY_NAME}/${IMAGE_NAME}:latest"        
 
   releaseNativeBinaries:
+    if: github.event.inputs.binaries == 'all' || github.event.inputs.binaries == 'native'
     needs: releaseDockerImage
     name: Release Native Binary
     runs-on: ${{ matrix.os }}
