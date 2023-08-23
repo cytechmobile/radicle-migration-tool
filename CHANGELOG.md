@@ -2,7 +2,7 @@
 
 ## 0.3.1 - 2023-08-22
 ### Features
-* Added support for multi-arch docker binary. Current pre-built docker image supports linux/amd64 and linux/arm64.
+* Support for multi-arch Docker images has been added. The current pre-built Docker image now includes support for both linux/amd64 and linux/arm64 architectures.
 
 ## 0.3.0 - 2023-08-09
 ### Fixes

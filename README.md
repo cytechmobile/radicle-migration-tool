@@ -149,13 +149,17 @@ docker pull ghcr.io/cytechmobile/radicle-github-migrate:latest
 # Tag the docker image in your local docker registry
 docker tag ghcr.io/cytechmobile/radicle-github-migrate:latest radicle-github-migrate
 
-# Run the migration
+# Run the migration ...
+# ... either by mounting the SSH_AUTH_SOCK (Option 1)
 docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -v $SSH_AUTH_SOCK:/ssh-agent radicle-github-migrate issues
+
+# ... or by passing the RAD_PASSPHRASE environment variable (Option 2)
+docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-github-migrate issues
 ```
 To ensure that the `docker run` command executes successfully, the following volumes are required:
 * `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs.
 * `~/.radicle:/root/.radicle`: This enables the tool to access your Radicle path. If the `rad path` command returns a different path, please update the volume accordingly.
-* `$SSH_AUTH_SOCK:/ssh-agent`: This allows the application to access your SSH agent for session authorization.
+* `$SSH_AUTH_SOCK:/ssh-agent`: This allows the application to access your SSH agent for session authorization. Alternatively, the RAD_PASSPHRASE environment variable can be set.
 
 The image assumes that your `radicle-httpd` service runs by default at `http://172.17.0.1:8080/api`, where `172.17.0.1` represents the IP address of the host from inside the Docker container. If you need to change this default configuration, you can utilize the available environment variables or CLI options provided.
 
