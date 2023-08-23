@@ -157,7 +157,7 @@ docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -v $SSH_AUTH_SOCK:
 docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-github-migrate issues
 ```
 To ensure that the `docker run` command executes successfully, the following volumes are required:
-* `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs.
+* `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs. IMPORTANT: Please ensure that the folder from which you run the tool has write permissions.
 * `~/.radicle:/root/.radicle`: This enables the tool to access your Radicle path. If the `rad path` command returns a different path, please update the volume accordingly.
 * `$SSH_AUTH_SOCK:/ssh-agent`: This allows the application to access your SSH agent for session authorization. Alternatively, the RAD_PASSPHRASE environment variable can be set.
 

@@ -10,4 +10,6 @@ COPY ./target/*-runner.jar /root/app.jar
 
 WORKDIR /root
 
+RUN mkdir config
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
