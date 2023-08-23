@@ -8,7 +8,6 @@ on:
 
 jobs:
   releaseDockerImage:
-    needs: releaseJavaBinary
     name: Release Docker Image
     runs-on: ubuntu-latest
     steps:
@@ -27,17 +26,6 @@ jobs:
           distribution: corretto
           java-version: 17
 
-      # Start SSH Agent and add the private key
-      - name: Start SSH Agent and add the private key
-        env:
-          SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
-          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
-          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
         # Create the docker image
       - name: Build & Push Docker Image
         if: success()
