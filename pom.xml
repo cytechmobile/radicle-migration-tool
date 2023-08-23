@@ -20,6 +20,7 @@
     <skipTests>true</skipTests>
     <dockerImageTag>latest</dockerImageTag>
     <dockerImagePush>false</dockerImagePush>
+    <dockerImageAdditionalTags/>
     <dockerRegistry/>
     <dockerUsername/>
     <dockerPassword/>
@@ -251,7 +252,8 @@
         <quarkus.container-image.username>${dockerUsername}</quarkus.container-image.username>
         <quarkus.container-image.password>${dockerPassword}</quarkus.container-image.password>
         <quarkus.container-image.group>cytechmobile</quarkus.container-image.group>
-        <quarkus.container-image.additional-tags>${dockerImageTag}</quarkus.container-image.additional-tags>
+        <quarkus.container-image.tag>${dockerImageTag}</quarkus.container-image.tag>
+        <quarkus.container-image.additional-tags>${dockerImageAdditionalTags}</quarkus.container-image.additional-tags>
         <quarkus.docker.buildx.platform>${dockerImageArchs}</quarkus.docker.buildx.platform>
         <quarkus.docker.buildx.output>${dockerBuildOutput}</quarkus.docker.buildx.output>
       </properties>

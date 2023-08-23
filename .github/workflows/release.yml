@@ -19,6 +19,7 @@ jobs:
         run: |
           VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MVN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true --batch-mode --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true" >> $GITHUB_ENV
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -51,5 +52,5 @@ jobs:
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
           # Changing the default driver is mandatory for multi-arch builds
           docker buildx create --name multiarch --use
-          ./mvnw package -Pdocker -DdockerImageTag=latest -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerBuildOutput=type=image \
-          -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}"
+          ./mvnw package -Pdocker -DdockerImageTag=latest -DdockerImageAdditionalTags=${IMAGE_VERSION}" -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerBuildOutput=type=image \
+          -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}" $MVN_OPTS

@@ -16,6 +16,11 @@ jobs:
     name: Release Java Binary
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Environment
+        shell: bash
+        run: |
+          echo "MVN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true --batch-mode --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true" >> $GITHUB_ENV
+
       - name: Fetch Sources
         uses: actions/checkout@v3
 
@@ -43,7 +48,7 @@ jobs:
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
 
       - name: Build Java Executable
-        run: ./mvnw package
+        run: ./mvnw package $MVN_OPTS
 
       - name: Remove Old Draft Releases
         env:
@@ -78,6 +83,7 @@ jobs:
         run: |
           VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MVN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true --batch-mode --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true" >> $GITHUB_ENV
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -111,7 +117,7 @@ jobs:
           # Changing the default driver is mandatory for multi-arch builds
           docker buildx create --name multiarch --use
           ./mvnw package -Pdocker -DdockerImageTag=draft -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerBuildOutput=type=image \
-          -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}"
+          -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}" $MVN_OPTS
 
   releaseNativeBinaries:
     needs: releaseDockerImage
@@ -167,7 +173,7 @@ jobs:
 
       - name: Build Native Executable
         shell: bash
-        run: eval "${MAVEN_COMMAND} verify -Pnative"
+        run: eval "${MAVEN_COMMAND} verify -Pnative $MVN_OPTS"
 
       - name: Upload Native Executable To Draft Release
         shell: bash
