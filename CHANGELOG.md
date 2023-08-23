@@ -1,6 +1,6 @@
 # radicle-github-migrate Changelog
 
-## 0.3.1 - 2023-08-22
+## 0.3.1 - 2023-08-23
 ### Features
 * Support for multi-arch Docker images has been added. The current pre-built Docker image now includes support for both linux/amd64 and linux/arm64 architectures.
 
