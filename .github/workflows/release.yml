@@ -40,5 +40,5 @@ jobs:
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
           # Changing the default driver is mandatory for multi-arch builds
           docker buildx create --name multiarch --use
-          ./mvnw package -Pdocker -DdockerImageTag=latest -DdockerImageAdditionalTags=${IMAGE_VERSION}" -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerBuildOutput=type=image \
+          ./mvnw package -Pdocker -DdockerImageTag=latest -DdockerImageAdditionalTags="${IMAGE_VERSION}" -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerBuildOutput=type=image \
           -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}" $MVN_OPTS
