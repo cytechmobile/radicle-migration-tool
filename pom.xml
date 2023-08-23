@@ -18,12 +18,13 @@
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.2.4.Final</quarkus.platform.version>
     <skipTests>true</skipTests>
-    <dockerImageArchs/>
     <dockerImageTag>latest</dockerImageTag>
     <dockerImagePush>false</dockerImagePush>
     <dockerRegistry/>
     <dockerUsername/>
     <dockerPassword/>
+    <dockerImageArchs/>
+    <dockerBuildOutput/>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -252,7 +253,7 @@
         <quarkus.container-image.group>cytechmobile</quarkus.container-image.group>
         <quarkus.container-image.additional-tags>${dockerImageTag}</quarkus.container-image.additional-tags>
         <quarkus.docker.buildx.platform>${dockerImageArchs}</quarkus.docker.buildx.platform>
-        <quarkus.docker.buildx.output>type=image</quarkus.docker.buildx.output>
+        <quarkus.docker.buildx.output>${dockerBuildOutput}</quarkus.docker.buildx.output>
       </properties>
     </profile>
   </profiles>
