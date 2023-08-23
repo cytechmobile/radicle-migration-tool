@@ -21,7 +21,9 @@
     <dockerImageArchs/>
     <dockerImageTag>latest</dockerImageTag>
     <dockerImagePush>false</dockerImagePush>
-    <dockerImageRegistry/>
+    <dockerRegistry/>
+    <dockerUsername/>
+    <dockerPassword/>
     <surefire-plugin.version>3.1.2</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -244,9 +246,11 @@
       <properties>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.push>${dockerImagePush}</quarkus.container-image.push>
-        <quarkus.container-image.registry>${dockerImageRegistry}</quarkus.container-image.registry>
-        <quarkus.container-image.tag>${dockerImageTag}</quarkus.container-image.tag>
-        <quarkus.container-image.name>radicle-github-migrate</quarkus.container-image.name>
+        <quarkus.container-image.registry>${dockerRegistry}</quarkus.container-image.registry>
+        <quarkus.container-image.username>${dockerUsername}</quarkus.container-image.username>
+        <quarkus.container-image.password>${dockerPassword}</quarkus.container-image.password>
+        <quarkus.container-image.group>cytechmobile</quarkus.container-image.group>
+        <quarkus.container-image.additional-tags>${dockerImageTag}</quarkus.container-image.additional-tags>
         <quarkus.docker.buildx.platform>${dockerImageArchs}</quarkus.docker.buildx.platform>
         <quarkus.docker.buildx.output>type=image</quarkus.docker.buildx.output>
       </properties>

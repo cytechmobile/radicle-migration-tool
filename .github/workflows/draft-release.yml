@@ -97,7 +97,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV    
         # Create the docker image
-      - name: Build Docker Image
+      - name: Build & Push Docker Image
         if: success()
         env:
           IMAGE_NAME: ${{ github.repository }}
@@ -107,11 +107,10 @@ jobs:
           REGISTRY_NAME: ghcr.io
         run: |
           set -x
-          # push image to github containers registry 
           echo $REGISTRY_PASS | docker login "${REGISTRY_NAME}" -u "${REGISTRY_PASS}" --password-stdin
           # Changing the default driver is mandatory for multi-arch builds
           docker buildx create --name multiarch --use
-          ./mvnw package -Pdocker -DdockerImageTag=draft -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerImagePush=true -DdockerImageRegistry="${REGISTRY_NAME}"
+          ./mvnw package -Pdocker -DdockerImageTag=draft -DdockerImageArchs=linux/amd64,linux/arm64 -DdockerImagePush=true -DdockerRegistry="${REGISTRY_NAME}" -DdockerPassword="${REGISTRY_PASS}" -DdockerUsername="${REGISTRY_USER}"
 
   releaseNativeBinaries:
     needs: releaseDockerImage
