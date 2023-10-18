@@ -107,6 +107,7 @@ public class Issue {
         }
         issue.state = new State(this.state, reason);
         issue.assignees = List.of();
+        issue.embeds = List.of();
 
         return issue;
     }

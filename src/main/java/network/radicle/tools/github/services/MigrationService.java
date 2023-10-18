@@ -1,5 +1,6 @@
 package network.radicle.tools.github.services;
 
+import com.google.common.base.Strings;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -11,8 +12,10 @@ import network.radicle.tools.github.core.github.Comment;
 import network.radicle.tools.github.core.github.Event;
 import network.radicle.tools.github.core.github.Issue;
 import network.radicle.tools.github.core.github.Timeline;
+import network.radicle.tools.github.core.radicle.Embed;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
+import network.radicle.tools.github.utils.Markdown;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +63,7 @@ public class MigrationService extends AbstractMigrationService {
                 try {
                     issues = github.getIssues(page, filters);
                     for (var issue : issues) {
-                        //ignore pull requests and issues that created before the since filter
+                        //ignore pull requests and issues that created before the `since` filter
                         if (issue.pullRequest != null || issue.createdAt.isBefore(filters.since())) {
                             continue;
                         }
@@ -68,6 +71,7 @@ public class MigrationService extends AbstractMigrationService {
 
                         var radIssue = issue.toRadicle();
                         try {
+                            radIssue.embeds = fetchEmbeds(issue.body);
                             var id = radicle.createIssue(session, radIssue);
                             // update issue's state
                             if (!Issue.STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
@@ -86,6 +90,8 @@ public class MigrationService extends AbstractMigrationService {
                             eventsCount += events.size();
 
                             for (var event : timeline) {
+                                List<Embed> embeds = List.of();
+
                                 //fetch any extra information for specific event types
                                 if (Event.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
                                         Event.Type.CLOSED.value.equalsIgnoreCase(event.getType())) {
@@ -93,8 +99,10 @@ public class MigrationService extends AbstractMigrationService {
                                     if (e.commitUrl != null) {
                                         e.commit = github.getCommit(e.commitId);
                                     }
+                                } else if (Event.Type.COMMENT.value.equalsIgnoreCase(event.getType())) {
+                                    embeds = fetchEmbeds(event.getBody());
                                 }
-                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata(), id));
+                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata(), embeds, id));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
@@ -158,6 +166,18 @@ public class MigrationService extends AbstractMigrationService {
         var radProject = config.getRadicle().project().replace("rad:", "");
         return "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
                 ".lastRunInMillis";
+    }
+
+    private List<Embed> fetchEmbeds(String body) {
+        var embeds = new ArrayList<Embed>();
+        var links = Markdown.extractUrls(body);
+        for (var link: links) {
+            var base64 = github.getAssetOrFile(link.url());
+            if (!Strings.isNullOrEmpty(base64)) {
+                embeds.add(new Embed(link.text(), base64));
+            }
+        }
+        return embeds;
     }
 
 }

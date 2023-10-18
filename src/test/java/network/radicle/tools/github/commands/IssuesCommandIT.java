@@ -216,6 +216,12 @@ public class IssuesCommandIT {
         public Commit getCommit(String commitId) throws Exception {
             return CommitTest.generateGitHubCommit();
         }
+
+        @Override
+        public String getAssetOrFile(String url) {
+            //todo: TBI
+            return null;
+        }
     }
 
     @Alternative

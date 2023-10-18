@@ -19,6 +19,7 @@ import static network.radicle.tools.github.utils.Markdown.strikethrough;
 public class Event extends Timeline {
 
     public enum Type {
+        COMMENT("comment"),
         ASSIGNED("assigned"),
         UNASSIGNED("unassigned"),
         CLOSED("closed"),

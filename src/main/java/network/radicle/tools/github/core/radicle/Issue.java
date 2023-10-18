@@ -25,6 +25,8 @@ public class Issue {
     public List<Discussion> discussion;
     @JsonProperty("labels")
     public List<String> labels;
+    @JsonProperty("embeds")
+    public List<Embed> embeds;
 
     @Override
     public String toString() {
@@ -37,6 +39,7 @@ public class Issue {
                 ", state=" + state +
                 ", discussion=" + discussion +
                 ", labels=" + labels +
+                ", embeds=" + embeds +
                 '}';
     }
 }

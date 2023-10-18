@@ -17,6 +17,8 @@ public class Discussion {
     public String body;
     @JsonProperty("reactions")
     public List<Reaction> reactions;
+    @JsonProperty("embeds")
+    public List<Embed> embeds;
     @JsonProperty("timestamp")
     public String timestamp;
     @JsonProperty("replyTo")
@@ -29,6 +31,7 @@ public class Discussion {
                 ", author=" + author +
                 ", body='" + body + '\'' +
                 ", reactions=" + reactions +
+                ", embeds=" + embeds +
                 ", timestamp='" + timestamp + '\'' +
                 ", replyTo='" + replyTo + '\'' +
                 '}';
