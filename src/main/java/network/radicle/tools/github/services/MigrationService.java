@@ -15,7 +15,9 @@ import network.radicle.tools.github.core.github.Timeline;
 import network.radicle.tools.github.core.radicle.Embed;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
+import network.radicle.tools.github.utils.FileUtils;
 import network.radicle.tools.github.utils.Markdown;
+import network.radicle.tools.github.utils.Markdown.MarkdownLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +73,11 @@ public class MigrationService extends AbstractMigrationService {
 
                         var radIssue = issue.toRadicle();
                         try {
-                            radIssue.embeds = fetchEmbeds(issue.body);
+                            //process inline embeds
+                            var links = Markdown.extractUrls(issue.body);
+                            radIssue.embeds = fetchEmbeds(links);
+                            radIssue.description = addEmbedsInline(links, radIssue.description);
+
                             var id = radicle.createIssue(session, radIssue);
                             // update issue's state
                             if (!Issue.STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
@@ -90,7 +96,8 @@ public class MigrationService extends AbstractMigrationService {
                             eventsCount += events.size();
 
                             for (var event : timeline) {
-                                List<Embed> embeds = List.of();
+                                List<MarkdownLink> eventLinks = List.of();
+                                List<Embed> eventEmbeds = List.of();
 
                                 //fetch any extra information for specific event types
                                 if (Event.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
@@ -100,9 +107,13 @@ public class MigrationService extends AbstractMigrationService {
                                         e.commit = github.getCommit(e.commitId);
                                     }
                                 } else if (Event.Type.COMMENT.value.equalsIgnoreCase(event.getType())) {
-                                    embeds = fetchEmbeds(event.getBody());
+                                    //process inline embeds
+                                    eventLinks = Markdown.extractUrls(event.getBody());
+                                    eventEmbeds = fetchEmbeds(eventLinks);
                                 }
-                                radicle.updateIssue(session, id, new CommentAction(event.getBodyWithMetadata(), embeds, id));
+
+                                var bodyWithMetadata = addEmbedsInline(eventLinks, event.getBodyWithMetadata());
+                                radicle.updateIssue(session, id, new CommentAction(bodyWithMetadata, eventEmbeds, id));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
@@ -168,16 +179,27 @@ public class MigrationService extends AbstractMigrationService {
                 ".lastRunInMillis";
     }
 
-    private List<Embed> fetchEmbeds(String body) {
+    private List<Embed> fetchEmbeds(List<MarkdownLink> links) {
         var embeds = new ArrayList<Embed>();
-        var links = Markdown.extractUrls(body);
         for (var link: links) {
-            var base64 = github.getAssetOrFile(link.url());
+            var base64 = github.getAssetOrFile(link.url);
             if (!Strings.isNullOrEmpty(base64)) {
-                embeds.add(new Embed(link.text(), base64));
+                var oid = FileUtils.calculateGitObjectId(base64);
+                if (!Strings.isNullOrEmpty(oid)) {
+                    link.oid = oid;
+                }
+                embeds.add(new Embed(oid, link.text, base64));
             }
         }
         return embeds;
     }
 
+    private String addEmbedsInline(List<MarkdownLink> links, String body) {
+        for (var link : links) {
+            if (!Strings.isNullOrEmpty(link.oid)) {
+                body = body.replace(link.url, link.oid);
+            }
+        }
+        return body;
+    }
 }

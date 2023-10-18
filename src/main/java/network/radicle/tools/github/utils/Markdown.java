@@ -114,5 +114,18 @@ public class Markdown {
         return builder.toString();
     }
 
-    public record MarkdownLink(String text, String url) {}
+    public static class MarkdownLink {
+        public String text;
+        public String url;
+        public String oid;
+
+        public MarkdownLink(String text, String url, String oid) {
+            this.text = text;
+            this.url = url;
+            this.oid = oid;
+        }
+        public MarkdownLink(String text, String url) {
+            this(text, url, null);
+        }
+    }
 }

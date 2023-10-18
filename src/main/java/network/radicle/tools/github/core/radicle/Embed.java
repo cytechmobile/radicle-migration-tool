@@ -7,6 +7,9 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Embed {
+    @JsonProperty("oid")
+    public String oid;
+
     @JsonProperty("name")
     public String name;
 
@@ -17,6 +20,13 @@ public class Embed {
     }
 
     public Embed(String name, String content) {
+        this.oid = null;
+        this.name = name;
+        this.content = content;
+    }
+
+    public Embed(String oid, String name, String content) {
+        this.oid = oid;
         this.name = name;
         this.content = content;
     }
@@ -24,6 +34,7 @@ public class Embed {
     @Override
     public String toString() {
         return "Embed{" +
+                "oid='" + oid + '\'' +
                 "name='" + name + '\'' +
                 ", content='" + content + '\'' +
                 '}';
