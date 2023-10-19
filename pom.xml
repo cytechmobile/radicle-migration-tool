@@ -7,7 +7,7 @@
   <version>0.4.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.12.2</checkstyle-tools.version>
+    <checkstyle-tools.version>10.12.4</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <maven.test.skip>true</maven.test.skip>
@@ -16,7 +16,7 @@
     <quarkus.package.type>uber-jar</quarkus.package.type>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.2.4.Final</quarkus.platform.version>
+    <quarkus.platform.version>3.4.3</quarkus.platform.version>
     <skipTests>true</skipTests>
     <dockerImageTag>latest</dockerImageTag>
     <dockerImagePush>false</dockerImagePush>
@@ -79,7 +79,7 @@
     <dependency>
       <groupId>com.sshtools</groupId>
       <artifactId>maverick-sshagent</artifactId>
-      <version>3.0.10</version>
+      <version>3.0.11</version>
     </dependency>
     <dependency>
       <groupId>net.steppschuh.markdowngenerator</groupId>
