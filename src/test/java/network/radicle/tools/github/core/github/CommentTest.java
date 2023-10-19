@@ -37,7 +37,7 @@ public class CommentTest {
 
     @Test
     public void testMarkdownLinkParsingFromComments() throws Exception {
-        var comments = loadGitHubCommentsWithEmbeds();
+        var comments = loadGitHubComments();
         var markdownWithAsset = comments.get(0).body;
         var actual = Markdown.extractUrls(markdownWithAsset);
 
@@ -46,8 +46,8 @@ public class CommentTest {
                 new MarkdownLink("1f339325af4161591a1a1a206a2fc5e66.pdf", "https://github.com/testowner/testrepo/files/12895629/1f339325af4161591a1a1a206a2fc5e66.pdf")
         );
 
-        assertThat(actual.size()).isEqualTo(expected.size());
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.size()).isNotZero().isEqualTo(expected.size());
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
     public static Comment generateGitHubComment() {
@@ -68,15 +68,6 @@ public class CommentTest {
     public static List<Comment> loadGitHubComments() {
         try {
             var file = new File("src/test/resources/github/comments.json");
-            return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });
-        } catch (Exception ex) {
-            return List.of();
-        }
-    }
-
-    public static List<Comment> loadGitHubCommentsWithEmbeds() {
-        try {
-            var file = new File("src/test/resources/github/comments-with-embeds.json");
             return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });
         } catch (Exception ex) {
             return List.of();
