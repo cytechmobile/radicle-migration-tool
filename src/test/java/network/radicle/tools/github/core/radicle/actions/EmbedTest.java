@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import network.radicle.tools.github.core.radicle.Embed;
-import network.radicle.tools.github.utils.FileUtils;
+import network.radicle.tools.github.services.FilesService;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -32,7 +32,8 @@ public class EmbedTest {
         var embed = generateEmbed();
         assertThat(embed).isNotNull();
 
-        var oid = FileUtils.calculateGitObjectId(embed.content);
+        var fileService = new FilesService();
+        var oid = fileService.calculateGitObjectId(embed.content);
         assertThat(oid).isNotNull().isEqualTo(embed.oid);
     }
 

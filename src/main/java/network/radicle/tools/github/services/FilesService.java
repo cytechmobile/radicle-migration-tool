@@ -1,5 +1,6 @@
-package network.radicle.tools.github.utils;
+package network.radicle.tools.github.services;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
-public class FileUtils {
-    private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
+@ApplicationScoped
+public class FilesService {
+    private static final Logger logger = LoggerFactory.getLogger(FilesService.class);
 
-    public static String getMimeType(byte[] fileBytes) {
+    public String getMimeType(byte[] fileBytes) {
         try (InputStream is = new ByteArrayInputStream(fileBytes)) {
             return new Tika().detect(is);
         } catch (IOException e) {
@@ -24,7 +26,7 @@ public class FileUtils {
         }
     }
 
-    public static String getBase64Prefix(byte[] fileBytes) {
+    public String getBase64Prefix(byte[] fileBytes) {
         var fileType = getMimeType(fileBytes);
         if (fileType != null) {
             return "data:" + fileType + ";base64,";
@@ -33,7 +35,7 @@ public class FileUtils {
         }
     }
 
-    public static String calculateGitObjectId(String base64) {
+    public String calculateGitObjectId(String base64) {
         try {
             //the base64 here has a header in the following format "<HEADER>,<PAYLOAD>"
             var base64Parts = base64.split(",");

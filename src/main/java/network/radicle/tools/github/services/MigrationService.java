@@ -15,7 +15,6 @@ import network.radicle.tools.github.core.github.Timeline;
 import network.radicle.tools.github.core.radicle.Embed;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
-import network.radicle.tools.github.utils.FileUtils;
 import network.radicle.tools.github.utils.Markdown;
 import network.radicle.tools.github.utils.Markdown.MarkdownLink;
 import org.slf4j.Logger;
@@ -35,6 +34,7 @@ public class MigrationService extends AbstractMigrationService {
     @Inject IGitHubClient github;
     @Inject IRadicleClient radicle;
     @Inject Config config;
+    @Inject FilesService filesService;
 
     public boolean migrateIssues() {
         var page = 1;
@@ -184,7 +184,7 @@ public class MigrationService extends AbstractMigrationService {
         for (var link: links) {
             var base64 = github.getAssetOrFile(link.url);
             if (!Strings.isNullOrEmpty(base64)) {
-                var oid = FileUtils.calculateGitObjectId(base64);
+                var oid = filesService.calculateGitObjectId(base64);
                 if (!Strings.isNullOrEmpty(oid)) {
                     link.oid = oid;
                 }

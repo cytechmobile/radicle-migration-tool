@@ -15,7 +15,7 @@ import network.radicle.tools.github.core.github.Commit;
 import network.radicle.tools.github.core.github.Event;
 import network.radicle.tools.github.core.github.Issue;
 import network.radicle.tools.github.handlers.ResponseHandler;
-import network.radicle.tools.github.utils.FileUtils;
+import network.radicle.tools.github.services.FilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +30,7 @@ public class GitHubClient implements IGitHubClient {
     @Inject Client client;
     @Inject ObjectMapper mapper;
     @Inject Config config;
+    @Inject FilesService filesService;
 
     public List<Issue> getIssues(int page, Config.Filters filters) throws Exception {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
@@ -149,7 +150,7 @@ public class GitHubClient implements IGitHubClient {
                     return null;
                 }
 
-                var base64Prefix = FileUtils.getBase64Prefix(fileContent);
+                var base64Prefix = filesService.getBase64Prefix(fileContent);
                 var base64Content = Base64.getEncoder().encodeToString(fileContent);
                 return base64Prefix + base64Content;
             }
