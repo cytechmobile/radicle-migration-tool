@@ -54,6 +54,7 @@ This tool is available under [Apache License, Version 2.0](https://www.apache.or
 The tool offers several important features, including:
 * It enables the migration of all GitHub issues from the source repository in a single run.
 * It migrates essential information such as the `Title`, `Description`, `Status`, `Labels`, `Comments`, `Events`, and `Milestone` details.
+* It supports the migration of inline assets/files discovered within GitHub issues and comments as Radicle embeds. A GitHub `user_session` cookie must be provided when migrating assets/files from a private GitHub repository by using either the `--github-session` CLI parameter or the `GITHUB_SESSION` environment variable. Login to GitHub via your browser and copy the value of the `user_session` cookie. 
 * Any additional information that doesn't fit within the Issue model is preserved in a dedicated `GitHub Metadata` section, along with references to the original repository
 * It supports incremental migration, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
 * It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
@@ -72,6 +73,7 @@ Migrate issues from a GitHub repository to a Radicle project.
       -gr, --github-repo=<gRepo>            The source GitHub repo.
       -go, --github-repo-owner=<gOwner>     The owner of the source GitHub repo.
       -gt, --github-token                   Your GitHub personal access token (with repo scope or read-only access granted).
+      -gs, --github-session                 The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
       -rv, --radicle-api-version=<rVersion> The version of the Radicle HTTP API (default: v1).
       -ru, --radicle-api-url=<rUrl>         The base url of Radicle HTTP API (default: http://localhost:8080/api).
       -rp, --radicle-project=<rProject>     The target Radicle project.
@@ -107,6 +109,7 @@ You can pass any of the command line options via environment variables. Here is 
 * GITHUB_REPO: The source GitHub repo
 * GITHUB_OWNER: The owner of the source GitHub repo
 * GITHUB_TOKEN: Your GitHub personal access token (with `repo` scope or `read-only access` granted).
+* GITHUB_SESSION: The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
 * RADICLE_API_VERSION: The version of the Radicle HTTP API (default v1)
 * RADICLE_API_URL: The base url of Radicle HTTP API (default http://localhost:8080/api)
 * RADICLE_PROJECT: The target Radicle project
