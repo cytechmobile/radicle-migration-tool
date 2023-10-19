@@ -53,6 +53,12 @@ public class Command implements Runnable {
     String gToken;
 
     @CommandLine.Option(
+            names = {"-gs", "--github-session"},
+            defaultValue = "${GITHUB_SESSION}",
+            description = "The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.")
+    String gSession;
+
+    @CommandLine.Option(
             names = {"-rv", "--radicle-api-version"},
             defaultValue = "${RADICLE_API_VERSION:-v1}",
             description = "The version of the Radicle HTTP API (default: v1).")
@@ -126,7 +132,7 @@ public class Command implements Runnable {
 
     private void loadConfiguration() {
         var filters = new Filters(fSince, fLabels, fState, fMilestone, fAssignee, fCreator);
-        config.setGithub(new GitHubConfig(gToken, gUrl, gVersion, gOwner, gRepo, filters, PAGE_SIZE));
+        config.setGithub(new GitHubConfig(gSession, gToken, gUrl, gVersion, gOwner, gRepo, filters, PAGE_SIZE));
         config.setRadicle(new RadicleConfig(rUrl, rVersion, rProject, dryRun));
     }
 

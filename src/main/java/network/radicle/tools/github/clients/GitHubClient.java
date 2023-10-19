@@ -131,7 +131,7 @@ public class GitHubClient implements IGitHubClient {
                 return null;
             }
 
-            byte[] fileContent = followRedirects(url, true);
+            var fileContent = followRedirects(url, true);
             if (fileContent == null) {
                 return null;
             }
@@ -148,6 +148,7 @@ public class GitHubClient implements IGitHubClient {
         try (var response = client.target(url)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, withAuthorization ? "Bearer " + Strings.nullToEmpty(config.getGithub().token()) : null)
+                .cookie("user_session", config.getGithub().session())
                 .get()) {
 
             int statusCode = response.getStatus();
