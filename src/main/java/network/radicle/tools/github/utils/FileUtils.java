@@ -1,11 +1,12 @@
 package network.radicle.tools.github.utils;
 
+import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URLConnection;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,20 +16,16 @@ import java.util.Base64;
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-    public static String getFileType(byte[] fileBytes) {
-        try {
-            var contentType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(fileBytes));
-            if (contentType != null) {
-                return contentType;
-            }
+    public static String getMimeType(byte[] fileBytes) {
+        try (InputStream is = new ByteArrayInputStream(fileBytes)) {
+            return new Tika().detect(is);
         } catch (IOException e) {
             return null;
         }
-        return null;
     }
 
     public static String getBase64Prefix(byte[] fileBytes) {
-        var fileType = getFileType(fileBytes);
+        var fileType = getMimeType(fileBytes);
         if (fileType != null) {
             return "data:" + fileType + ";base64,";
         } else {
