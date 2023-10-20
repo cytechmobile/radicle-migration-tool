@@ -251,8 +251,8 @@ public class MarkdownService {
             this.summary = "";
         }
 
-        public MetadataBuilder summary(String summary) {
-            this.summary = summary;
+        public MetadataBuilder summary(String title) {
+            this.summary = title;
             return this;
         }
 
