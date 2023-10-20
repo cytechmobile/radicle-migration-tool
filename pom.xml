@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>network.radicle.tools.github</groupId>
   <artifactId>radicle-github-migrate</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
     <checkstyle-tools.version>10.12.4</checkstyle-tools.version>
@@ -82,9 +82,14 @@
       <version>3.0.11</version>
     </dependency>
     <dependency>
-      <groupId>net.steppschuh.markdowngenerator</groupId>
-      <artifactId>markdowngenerator</artifactId>
-      <version>1.3.1.1</version>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-all</artifactId>
+      <version>0.64.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>2.8.0</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

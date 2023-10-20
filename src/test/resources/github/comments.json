@@ -28,7 +28,7 @@
     "created_at": "2023-05-09T08:43:55Z",
     "updated_at": "2023-05-09T08:43:55Z",
     "author_association": "MEMBER",
-    "body": "First comment",
+    "body": "this is sample text ![Sample Screenshot](https://github.com/testowner/testrepo/assets/2813615/23bfc62e-791d-427b-bdab-aa5ea3abe81f) and another file here [1f339325af4161591a1a1a206a2fc5e66.pdf](https://github.com/testowner/testrepo/files/12895629/1f339325af4161591a1a1a206a2fc5e66.pdf) and the some more text",
     "reactions": {
       "url": "https://api.github.com/repos/testowner/testrepo/issues/comments/1539703172/reactions",
       "total_count": 1,

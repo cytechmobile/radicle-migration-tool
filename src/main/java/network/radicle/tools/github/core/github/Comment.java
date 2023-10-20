@@ -3,14 +3,8 @@ package network.radicle.tools.github.core.github;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import network.radicle.tools.github.utils.Markdown;
 
 import java.time.Instant;
-import java.util.ArrayList;
-
-import static network.radicle.tools.github.core.github.Issue.METADATA_TITLE;
-import static network.radicle.tools.github.utils.Markdown.escape;
-import static network.radicle.tools.github.utils.Markdown.link;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,26 +30,6 @@ public class Comment extends Timeline {
     public String issueUrl;
     @JsonProperty("author_association")
     public String authorAssociation;
-
-    public String getMetadata() {
-        var metadata = new Markdown().openDropDown(METADATA_TITLE);
-
-        var headers = new ArrayList<>();
-        headers.add("Number");
-        headers.add("Created On");
-        headers.add("Created By");
-        metadata.openTable(headers.toArray());
-
-        var rows = new ArrayList<>();
-        rows.add(link(String.valueOf(this.id), this.htmlUrl));
-        rows.add(escape(DTF.format(this.createdAt)));
-        rows.add(link(this.user.login, this.user.htmlUrl));
-
-        metadata.addTableRow(rows.toArray());
-        metadata.closeTable().closeDropDown();
-
-        return metadata.build();
-    }
 
     public String getBody() {
         return this.body;

@@ -1,5 +1,9 @@
 # radicle-github-migrate Changelog
 
+## 0.4.0 - 2023-10-19
+### Features
+* Added support for migrating the inline assets/files discovered within GitHub issues and comments as Radicle embeds. 
+
 ## 0.3.1 - 2023-08-23
 ### Features
 * Support for multi-arch Docker images has been added. The current pre-built Docker image now includes support for both linux/amd64 and linux/arm64 architectures.

@@ -39,8 +39,8 @@ public class Config {
                 '}';
     }
 
-    public record GitHubConfig(String token, URL url, String version, String owner, String repo, Filters filters,
-                               int pageSize) {
+    public record GitHubConfig(String session, String token, URL url, String version, String owner, String repo,
+                               Filters filters, int pageSize) {
         @Override
         public String toString() {
             return "GitHubConfig{" +

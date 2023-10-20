@@ -16,4 +16,6 @@ public interface IGitHubClient {
     List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception;
 
     Commit getCommit(String commitId) throws Exception;
+
+    String getAssetOrFile(String url);
 }

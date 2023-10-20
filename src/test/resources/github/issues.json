@@ -49,7 +49,7 @@
       "patch_url": "https://github.com/testowner/testrepo/pull/7.patch",
       "merged_at": "2023-02-16T08:52:15Z"
     },
-    "body": null,
+    "body": "this is sample text ![Sample Screenshot](https://github.com/testowner/testrepo/assets/2813615/23bfc62e-791d-427b-bdab-aa5ea3abe81f) and another file here [1f339325af4161591a1a1a206a2fc5e66.pdf](https://github.com/testowner/testrepo/files/12895629/1f339325af4161591a1a1a206a2fc5e66.pdf) and the some more text",
     "reactions": {
       "url": "https://api.github.com/repos/testowner/testrepo/issues/7/reactions",
       "total_count": 0,

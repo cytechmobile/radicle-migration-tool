@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static network.radicle.tools.github.services.MarkdownService.DTF;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class EventTest {
@@ -33,7 +34,7 @@ public class EventTest {
     public void testCreatedAtFormatting() {
         var expected = "Dec 20, 2021 13:42:05 UTC";
         var events = loadGitHubEvents();
-        var formatted = Timeline.DTF.format(events.get(0).createdAt);
+        var formatted = DTF.format(events.get(0).createdAt);
         assertThat(formatted).isEqualTo(expected);
     }
 

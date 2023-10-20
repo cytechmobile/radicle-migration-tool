@@ -13,6 +13,7 @@ import network.radicle.tools.github.clients.IRadicleClient;
 import network.radicle.tools.github.core.github.*;
 import network.radicle.tools.github.core.radicle.Session;
 import network.radicle.tools.github.core.radicle.actions.Action;
+import network.radicle.tools.github.core.radicle.actions.EmbedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,6 +216,12 @@ public class IssuesCommandIT {
         @Override
         public Commit getCommit(String commitId) throws Exception {
             return CommitTest.generateGitHubCommit();
+        }
+
+        @Override
+        public String getAssetOrFile(String url) {
+            var embed = EmbedTest.generateEmbed();
+            return embed != null ? embed.content : null;
         }
     }
 

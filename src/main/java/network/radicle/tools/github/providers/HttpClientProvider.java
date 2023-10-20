@@ -13,6 +13,7 @@ public class HttpClientProvider {
     public Client provide() {
         ResteasyClientBuilder builder = (ResteasyClientBuilder) ResteasyClientBuilder.newBuilder();
         return builder.connectionPoolSize(10)
+                .setFollowRedirects(true)
                 .connectTimeout(2, TimeUnit.MINUTES)
                 .readTimeout(3, TimeUnit.MINUTES)
                 .build();
