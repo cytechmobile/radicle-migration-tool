@@ -15,8 +15,7 @@ import network.radicle.tools.github.core.github.Timeline;
 import network.radicle.tools.github.core.radicle.Embed;
 import network.radicle.tools.github.core.radicle.actions.CommentAction;
 import network.radicle.tools.github.core.radicle.actions.LifecycleAction;
-import network.radicle.tools.github.utils.Markdown;
-import network.radicle.tools.github.utils.Markdown.MarkdownLink;
+import network.radicle.tools.github.services.MarkdownService.MarkdownLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static network.radicle.tools.github.core.github.Issue.STATE_COMPLETED;
+import static network.radicle.tools.github.core.github.Issue.STATE_OPEN;
+import static network.radicle.tools.github.core.github.Issue.STATE_OTHER;
+import static network.radicle.tools.github.core.github.Issue.STATE_SOLVED;
 
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
@@ -35,6 +40,7 @@ public class MigrationService extends AbstractMigrationService {
     @Inject IRadicleClient radicle;
     @Inject Config config;
     @Inject FilesService filesService;
+    @Inject MarkdownService markdownService;
 
     public boolean migrateIssues() {
         var page = 1;
@@ -71,16 +77,16 @@ public class MigrationService extends AbstractMigrationService {
                         }
                         processedCount++;
 
-                        var radIssue = issue.toRadicle();
+                        var radIssue = toRadicle(issue);
                         try {
                             //process inline embeds
-                            var links = Markdown.extractUrls(issue.body);
+                            var links = markdownService.extractUrls(issue.body);
                             radIssue.embeds = fetchEmbeds(links);
                             radIssue.description = addEmbedsInline(links, radIssue.description);
 
                             var id = radicle.createIssue(session, radIssue);
                             // update issue's state
-                            if (!Issue.STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
+                            if (!STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
                                 radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
                             }
 
@@ -108,12 +114,12 @@ public class MigrationService extends AbstractMigrationService {
                                     }
                                 } else if (Event.Type.COMMENT.value.equalsIgnoreCase(event.getType())) {
                                     //process inline embeds
-                                    eventLinks = Markdown.extractUrls(event.getBody());
+                                    eventLinks = markdownService.extractUrls(event.getBody());
                                     eventEmbeds = fetchEmbeds(eventLinks);
                                 }
-
-                                var bodyWithMetadata = addEmbedsInline(eventLinks, event.getBodyWithMetadata());
-                                radicle.updateIssue(session, id, new CommentAction(bodyWithMetadata, eventEmbeds, id));
+                                var bodyWithMetadata = markdownService.getBodyWithMetadata(event);
+                                var bodyWithEmbeds = addEmbedsInline(eventLinks, bodyWithMetadata);
+                                radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
@@ -201,5 +207,36 @@ public class MigrationService extends AbstractMigrationService {
             }
         }
         return body;
+    }
+
+    public network.radicle.tools.github.core.radicle.Issue toRadicle(Issue issue) {
+        var radIssue = new network.radicle.tools.github.core.radicle.Issue();
+
+        radIssue.title = issue.title;
+        var meta = markdownService.getMetadata(issue);
+        radIssue.description = Strings.isNullOrEmpty(meta) ?
+                Strings.nullToEmpty(issue.body) :
+                meta + "<br/>" + "\n\n" +  Strings.nullToEmpty(issue.body);
+        radIssue.labels = issue.labels != null ?
+                issue.labels.stream().map(l -> l.name).collect(Collectors.toList()) :
+                List.of();
+
+        if (issue.milestone != null) {
+            var rLabels = new ArrayList<>(radIssue.labels);
+            rLabels.add(issue.milestone.title);
+            radIssue.labels = rLabels;
+        }
+
+        var reason = "";
+        if (STATE_OPEN.equalsIgnoreCase(issue.state)) {
+            reason = null;
+        } else {
+            reason = STATE_COMPLETED.equalsIgnoreCase(issue.stateReason) ? STATE_SOLVED : STATE_OTHER;
+        }
+        radIssue.state = new network.radicle.tools.github.core.radicle.State(issue.state, reason);
+        radIssue.assignees = List.of();
+        radIssue.embeds = List.of();
+
+        return radIssue;
     }
 }

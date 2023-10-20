@@ -1,8 +1,8 @@
 package network.radicle.tools.github.core.github;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import network.radicle.tools.github.utils.Markdown;
-import network.radicle.tools.github.utils.Markdown.MarkdownLink;
+import network.radicle.tools.github.services.MarkdownService;
+import network.radicle.tools.github.services.MarkdownService.MarkdownLink;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,8 @@ public class CommentTest {
     public void testMarkdownLinkParsingFromComments() throws Exception {
         var comments = loadGitHubComments();
         var markdownWithAsset = comments.get(0).body;
-        var actual = Markdown.extractUrls(markdownWithAsset);
+        var markdownService = new MarkdownService();
+        var actual = markdownService.extractUrls(markdownWithAsset);
 
         var expected = List.of(
                 new MarkdownLink("Sample Screenshot", "https://github.com/testowner/testrepo/assets/2813615/23bfc62e-791d-427b-bdab-aa5ea3abe81f"),
