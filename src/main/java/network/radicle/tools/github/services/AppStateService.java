@@ -14,8 +14,8 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 @ApplicationScoped
-public class FileStorageService {
-    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+public class AppStateService {
+    private static final Logger logger = LoggerFactory.getLogger(AppStateService.class);
 
     private Properties properties;
     private Path configFile;

@@ -8,14 +8,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FileStorageServiceTest {
+public class AppStateServiceTest {
 
     @Test
     public void testGetAndSetProperty() {
         var name = UUID.randomUUID().toString();
         var value = UUID.randomUUID().toString();
 
-        var service = new FileStorageService();
+        var service = new AppStateService();
         service.path = "store.properties";
         service.init();
         service.setProperty(name, value);
