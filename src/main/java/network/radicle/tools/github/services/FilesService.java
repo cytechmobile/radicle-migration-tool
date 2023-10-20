@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,9 +17,10 @@ public class FilesService {
     private static final Logger logger = LoggerFactory.getLogger(FilesService.class);
 
     public String getMimeType(byte[] fileBytes) {
-        try (InputStream is = new ByteArrayInputStream(fileBytes)) {
+        try (var is = new ByteArrayInputStream(fileBytes)) {
             return new Tika().detect(is);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            logger.error("Exception upon detecting mime-type", e);
             return null;
         }
     }

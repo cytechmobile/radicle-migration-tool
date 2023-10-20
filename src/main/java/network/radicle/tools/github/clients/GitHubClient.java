@@ -155,7 +155,7 @@ public class GitHubClient implements IGitHubClient {
                 return base64Prefix + base64Content;
             }
         } catch (Exception ex) {
-            logger.warn("Failed to fetch: {}", url);
+            logger.warn("Failed to fetch: {}", url, ex);
             return null;
         }
     }
