@@ -115,7 +115,6 @@ public class MigrationService extends AbstractMigrationService {
                                     //process inline embeds
                                     eventLinks = markdownService.extractUrls(event.getBody());
                                     eventEmbeds = fetchEmbeds(eventLinks);
-                                    logger.info("EMBEDS: {}", eventEmbeds);
                                 }
                                 var bodyWithMetadata = markdownService.getBodyWithMetadata(event);
                                 var bodyWithEmbeds = addEmbedsInline(eventLinks, bodyWithMetadata);
