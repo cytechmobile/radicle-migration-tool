@@ -27,10 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static network.radicle.tools.github.core.github.Issue.STATE_COMPLETED;
-import static network.radicle.tools.github.core.github.Issue.STATE_OPEN;
-import static network.radicle.tools.github.core.github.Issue.STATE_OTHER;
-import static network.radicle.tools.github.core.github.Issue.STATE_SOLVED;
+import static network.radicle.tools.github.core.github.Issue.*;
 
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
@@ -48,6 +45,7 @@ public class MigrationService extends AbstractMigrationService {
         var processedCount = 0;
         var commentsCount = 0;
         var eventsCount = 0;
+        var assetsCount = 0;
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
@@ -100,6 +98,7 @@ public class MigrationService extends AbstractMigrationService {
 
                             commentsCount += comments.size();
                             eventsCount += events.size();
+                            assetsCount += radIssue.embeds.size();
 
                             for (var event : timeline) {
                                 List<MarkdownLink> eventLinks = List.of();
@@ -116,17 +115,21 @@ public class MigrationService extends AbstractMigrationService {
                                     //process inline embeds
                                     eventLinks = markdownService.extractUrls(event.getBody());
                                     eventEmbeds = fetchEmbeds(eventLinks);
+                                    logger.info("EMBEDS: {}", eventEmbeds);
                                 }
                                 var bodyWithMetadata = markdownService.getBodyWithMetadata(event);
                                 var bodyWithEmbeds = addEmbedsInline(eventLinks, bodyWithMetadata);
                                 radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+
+                                assetsCount += eventEmbeds.size();
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
                             logger.warn("Failed to migrate issue: {}. Error: {}", issue.number, ex.getMessage());
                         }
                     }
-                    logger.info("Processed issues: {}, comments: {}, events: {} ...", processedCount, commentsCount, eventsCount);
+                    logger.info("Processed issues: {}, comments: {}, events: {}, assets: {} ...",
+                            processedCount, commentsCount, eventsCount, assetsCount);
 
                     hasMoreIssues = config.getGithub().pageSize() == issues.size();
                     page++;
@@ -145,7 +148,8 @@ public class MigrationService extends AbstractMigrationService {
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }
-            logger.info("Totally processed issues: {}, comments: {}, events: {}", processedCount, commentsCount, eventsCount);
+            logger.info("Totally processed issues: {}, comments: {}, events: {}, assets: {}",
+                    processedCount, commentsCount, eventsCount, assetsCount);
             return true;
         } catch (Exception ex) {
             logger.error("Migration failed", ex);
