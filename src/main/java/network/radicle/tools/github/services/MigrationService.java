@@ -27,7 +27,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static network.radicle.tools.github.core.github.Issue.*;
+import static network.radicle.tools.github.core.github.Issue.STATE_COMPLETED;
+import static network.radicle.tools.github.core.github.Issue.STATE_OPEN;
+import static network.radicle.tools.github.core.github.Issue.STATE_OTHER;
+import static network.radicle.tools.github.core.github.Issue.STATE_SOLVED;
 
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
