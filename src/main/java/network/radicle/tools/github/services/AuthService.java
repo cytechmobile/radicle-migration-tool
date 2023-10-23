@@ -11,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -27,19 +26,11 @@ public class AuthService {
     @Inject Config config;
 
     public String sign(Session session) {
-        try {
-            return sign(session, new FileInputStream(radHome.orElse("~/.radicle") + "/keys/radicle"));
-        } catch (Exception e) {
-            logger.debug("Failed to sign the session. Error: {}", e.getMessage());
-            return null;
-        }
-    }
-
-    public String sign(Session session, InputStream key) {
         var originalError = System.err;
         try {
             System.setErr(new PrintStream(new ByteArrayOutputStream()));
-            var kp = SshKeyUtils.getPrivateKey(key, config.getRadicle().passphrase());
+            var kp = SshKeyUtils.getPrivateKey(new File(radHome.orElse("~/.radicle") + "/keys/radicle"),
+                    config.getRadicle().passphrase());
             var dataToSign = session.id + ":" + session.publicKey;
             var signedData = kp.getPrivateKey().sign(dataToSign.getBytes(StandardCharsets.UTF_8));
 

@@ -5,8 +5,7 @@ import network.radicle.tools.github.Config.RadicleConfig;
 import network.radicle.tools.github.core.radicle.Session;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,15 +15,16 @@ class AuthServiceTest {
     private final static String SIGNATURE = "z3oJuT3cPvNXopAjxWWMAB3qQfd7PkRoAGGnyvxqcbViYuvdmoYpZSVRMuSrTPADkUNmdb1CdeBLr3D75JUh4WLiW";
 
     @Test
-    void testSessionSign() throws FileNotFoundException {
+    void testSessionSign() {
         var authService = new AuthService();
         authService.config = new Config();
         authService.config.setRadicle(new RadicleConfig(null, null, null, "test", false));
+        authService.radHome =  Optional.of("src/test/resources/radicle");
         var session = new Session();
         session.publicKey = PUBLIC_KEY;
         session.id = SESSION_ID;
 
-        var signature = authService.sign(session, new FileInputStream("src/test/resources/radicle/keys/radicle"));
+        var signature = authService.sign(session);
         assertThat(signature).isEqualTo(SIGNATURE);
     }
 }
