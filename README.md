@@ -54,7 +54,7 @@ This tool is available under [Apache License, Version 2.0](https://www.apache.or
 The tool offers several important features, including:
 * It enables the migration of all GitHub issues from the source repository in a single run.
 * It migrates essential information such as the `Title`, `Description`, `Status`, `Labels`, `Comments`, `Events`, and `Milestone` details.
-* It supports the migration of inline assets/files discovered within GitHub issues and comments as Radicle embeds. A GitHub `user_session` cookie must be provided when migrating assets/files from a private GitHub repository by using either the `--github-session` CLI parameter or the `GITHUB_SESSION` environment variable. Login to GitHub via your browser and copy the value of the `user_session` cookie. 
+* It supports the migration of inline assets/files discovered within GitHub issues and comments as Radicle embeds. A GitHub `user_session` cookie must be provided when migrating assets/files from a private GitHub repository by using either the `--gh-session` CLI parameter or the `GH_SESSION` environment variable. Login to GitHub via your browser and copy the value of the `user_session` cookie. 
 * Any additional information that doesn't fit within the Issue model is preserved in a dedicated `GitHub Metadata` section, along with references to the original repository
 * It supports incremental migration, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
 * It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
@@ -64,19 +64,20 @@ The tool offers several important features, including:
 
 ### Command-line interface
 ```bash 
-Usage: radicle-github-migrate issues [-gv=<gVersion>] [-gu=<gUrl>] -gr=<gRepo> -go=<gOwner> -gt [-rv=<rVersion>] [-ru=<rUrl>] -rp=<rProject> [-fs=<fSince>] [-fl=<fLabels>] [-ft=<fState>] [-fm=<fMilestone>] [-fa=<fAssignee>] [-fc=<fCreator>] 
+Usage: radicle-github-migrate issues [-gv=<gVersion>] [-gu=<gUrl>] -gr=<gRepo> -go=<gOwner> -gt [-gs=<gSession>] [-rv=<rVersion>] [-ru=<rUrl>] -rp=<rProject> -rh [-fs=<fSince>] [-fl=<fLabels>] [-ft=<fState>] [-fm=<fMilestone>] [-fa=<fAssignee>] [-fc=<fCreator>] [-dr]
 
 Migrate issues from a GitHub repository to a Radicle project.       
    
-      -gv, --github-api-version=<gVersion>  The version of the GitHub REST API (default: 2022-11-28).
-      -gu, --github-api-url=<gUrl>          The base url of the GitHub REST API (default: https://api.github.com).
-      -gr, --github-repo=<gRepo>            The source GitHub repo.
-      -go, --github-repo-owner=<gOwner>     The owner of the source GitHub repo.
-      -gt, --github-token                   Your GitHub personal access token (with repo scope or read-only access granted).
-      -gs, --github-session                 The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
-      -rv, --radicle-api-version=<rVersion> The version of the Radicle HTTP API (default: v1).
-      -ru, --radicle-api-url=<rUrl>         The base url of Radicle HTTP API (default: http://localhost:8080/api).
-      -rp, --radicle-project=<rProject>     The target Radicle project.
+      -gv, --gh-api-version=<gVersion>      The version of the GitHub REST API (default: 2022-11-28).
+      -gu, --gh-api-url=<gUrl>              The base url of the GitHub REST API (default: https://api.github.com).
+      -gr, --gh-repo=<gRepo>                The source GitHub repo.
+      -go, --gh-repo-owner=<gOwner>         The owner of the source GitHub repo.
+      -gt, --gh-token                       Your GitHub personal access token (with repo scope or read-only access granted).
+      -gs, --gh-session                     The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
+      -rv, --rad-api-version=<rVersion>     The version of the Radicle HTTP API (default: v1).
+      -ru, --rad-api-url=<rUrl>             The base url of Radicle HTTP API (default: http://localhost:8080/api).
+      -rp, --rad-project=<rProject>         The target Radicle project.
+      -rh, --rad-passphrase=<rPassphrase>   Your radicle passphrase.
       -fs, --filter-since=<fSince>          Migrate issues created after the given time (default: lastRun in store.properties file, example: 2023-01-01T10:15:30+01:00).
       -fl, --filter-labels=<fLabels>        Migrate issues with the given labels given in a csv format (example: bug,ui,@high).
       -ft, --filter-state=<fState>          Migrate issues in this state (default: all, can be one of: open, closed, all).
@@ -104,15 +105,16 @@ Since the Issue model and HTTP API in Radicle are currently simpler compared to 
 
 ### Environment Variables
 You can pass any of the command line options via environment variables. Here is the complete list of the supported environment variables:
-* GITHUB_API_VERSION: The version of the GitHub REST API (default 2022-11-28)
-* GITHUB_API_URL: The base url of the GitHub REST API (default https://api.github.com)
-* GITHUB_REPO: The source GitHub repo
-* GITHUB_OWNER: The owner of the source GitHub repo
-* GITHUB_TOKEN: Your GitHub personal access token (with `repo` scope or `read-only access` granted).
-* GITHUB_SESSION: The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
-* RADICLE_API_VERSION: The version of the Radicle HTTP API (default v1)
-* RADICLE_API_URL: The base url of Radicle HTTP API (default http://localhost:8080/api)
-* RADICLE_PROJECT: The target Radicle project
+* GH_API_VERSION: The version of the GitHub REST API (default 2022-11-28)
+* GH_API_URL: The base url of the GitHub REST API (default https://api.github.com)
+* GH_REPO: The source GitHub repo
+* GH_OWNER: The owner of the source GitHub repo
+* GH_TOKEN: Your GitHub personal access token (with `repo` scope or `read-only access` granted).
+* GH_SESSION: The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.
+* RAD_API_VERSION: The version of the Radicle HTTP API (default v1)
+* RAD_API_URL: The base url of Radicle HTTP API (default http://localhost:8080/api)
+* RAD_PROJECT: The target Radicle project
+* RAD_PASSPHRASE: Your radicle passphrase
 * FILTER_SINCE: Migrate issues created after the given time (default: lastRun in store.properties file, example: 2023-01-01T10:15:30+01:00).
 * FILTER_LABELS: Migrate issues with the given labels given in a csv format (example: bug,ui,@high).
 * FILTER_STATE: Migrate issues in this state (default: all, can be one of: open, closed, all).
@@ -152,17 +154,12 @@ docker pull ghcr.io/cytechmobile/radicle-github-migrate:latest
 # Tag the docker image in your local docker registry
 docker tag ghcr.io/cytechmobile/radicle-github-migrate:latest radicle-github-migrate
 
-# Run the migration ...
-# ... either by mounting the SSH_AUTH_SOCK (Option 1)
-docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -v $SSH_AUTH_SOCK:/ssh-agent radicle-github-migrate issues
-
-# ... or by passing the RAD_PASSPHRASE environment variable (Option 2)
+# Run the migration
 docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-github-migrate issues
 ```
 To ensure that the `docker run` command executes successfully, the following volumes are required:
 * `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs. IMPORTANT: Please ensure that the folder from which you run the tool has the appropriate write permissions.
 * `~/.radicle:/root/.radicle`: This enables the tool to access your Radicle path. If the `rad path` command returns a different path, please update the volume accordingly.
-* `$SSH_AUTH_SOCK:/ssh-agent`: This allows the application to access your SSH agent for session authorization. Alternatively, the RAD_PASSPHRASE environment variable can be set.
 
 The image assumes that your `radicle-httpd` service runs by default at `http://172.17.0.1:8080/api`, where `172.17.0.1` represents the IP address of the host from inside the Docker container. If you need to change this default configuration, you can utilize the available environment variables or CLI options provided.
 
