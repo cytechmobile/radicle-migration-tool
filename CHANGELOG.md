@@ -3,6 +3,7 @@
 ## 0.4.0 - 2023-10-19
 ### Features
 * Added support for migrating the inline assets/files discovered within GitHub issues and comments as Radicle embeds. 
+* Removed dependency on the ssh agent by using the private key to sign the session. 
 
 ## 0.3.1 - 2023-08-23
 ### Features
