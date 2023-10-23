@@ -1,7 +1,6 @@
 FROM amazoncorretto:17-alpine
 ENV STORAGE_FILE_PATH="/root/config/store.properties"
-ENV SSH_AUTH_SOCK="/ssh-agent"
-ENV RADICLE_API_URL="http://172.17.0.1:8080/api"
+ENV RAD_API_URL="http://172.17.0.1:8080/api"
 
 RUN apk --no-cache add wget curl
 RUN wget https://radicle.xyz/install && chmod +x install && ./install && cp ~/.radicle/bin/rad /bin/
