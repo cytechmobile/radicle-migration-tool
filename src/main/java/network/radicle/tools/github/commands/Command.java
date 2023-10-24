@@ -19,63 +19,71 @@ public class Command implements Runnable {
     public static final int PAGE_SIZE = 100;
 
     @CommandLine.Option(
-            names = {"-gv", "--github-api-version"},
-            defaultValue = "${GITHUB_API_VERSION:-2022-11-28}",
+            names = {"-gv", "--gh-api-version"},
+            defaultValue = "${GH_API_VERSION:-2022-11-28}",
             description = "The version of the GitHub REST API (default: 2022-11-28).")
     String gVersion;
 
     @CommandLine.Option(
-            names = {"-gu", "--github-api-url"},
-            defaultValue = "${GITHUB_API_URL:-https://api.github.com}",
+            names = {"-gu", "--gh-api-url"},
+            defaultValue = "${GH_API_URL:-https://api.github.com}",
             description = "The base url of the GitHub REST API (default: https://api.github.com).")
     URL gUrl;
 
     @CommandLine.Option(
-            names = {"-gr", "--github-repo"},
+            names = {"-gr", "--gh-repo"},
             required = true,
-            defaultValue = "${GITHUB_REPO}",
+            defaultValue = "${GH_REPO}",
             description = "The source GitHub repo.")
     String gRepo;
 
     @CommandLine.Option(
-            names = {"-go", "--github-repo-owner"},
+            names = {"-go", "--gh-repo-owner"},
             required = true,
-            defaultValue = "${GITHUB_OWNER}",
+            defaultValue = "${GH_OWNER}",
             description = "The owner of the source GitHub repo.")
     String gOwner;
 
     @CommandLine.Option(
-            names = {"-gt", "--github-token"},
+            names = {"-gt", "--gh-token"},
             required = true,
             interactive = true,
-            defaultValue = "${GITHUB_TOKEN}",
+            defaultValue = "${GH_TOKEN}",
             description = "Your GitHub personal access token (with `repo` scope or `read-only access` granted).")
     String gToken;
 
     @CommandLine.Option(
-            names = {"-gs", "--github-session"},
-            defaultValue = "${GITHUB_SESSION}",
+            names = {"-gs", "--gh-session"},
+            defaultValue = "${GH_SESSION}",
             description = "The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.")
     String gSession;
 
     @CommandLine.Option(
-            names = {"-rv", "--radicle-api-version"},
-            defaultValue = "${RADICLE_API_VERSION:-v1}",
+            names = {"-rv", "--rad-api-version"},
+            defaultValue = "${RAD_API_VERSION:-v1}",
             description = "The version of the Radicle HTTP API (default: v1).")
     String rVersion;
 
     @CommandLine.Option(
-            names = {"-ru", "--radicle-api-url"},
-            defaultValue = "${RADICLE_API_URL:-http://localhost:8080/api}",
+            names = {"-ru", "--rad-api-url"},
+            defaultValue = "${RAD_API_URL:-http://localhost:8080/api}",
             description = "The base url of Radicle HTTP API (default: http://localhost:8080/api).")
     URL rUrl;
 
     @CommandLine.Option(
-            names = {"-rp", "--radicle-project"},
+            names = {"-rp", "--rad-project"},
             required = true,
-            defaultValue = "${RADICLE_PROJECT}",
+            defaultValue = "${RAD_PROJECT}",
             description = "The target Radicle project.")
     String rProject;
+
+    @CommandLine.Option(
+            names = {"-rh", "--rad-passphrase"},
+            required = true,
+            interactive = true,
+            defaultValue = "${RAD_PASSPHRASE}",
+            description = "Your radicle passphrase.")
+    String rPassphrase;
 
     @CommandLine.Option(
             converter = InstantConverter.class,
@@ -133,7 +141,7 @@ public class Command implements Runnable {
     private void loadConfiguration() {
         var filters = new Filters(fSince, fLabels, fState, fMilestone, fAssignee, fCreator);
         config.setGithub(new GitHubConfig(gSession, gToken, gUrl, gVersion, gOwner, gRepo, filters, PAGE_SIZE));
-        config.setRadicle(new RadicleConfig(rUrl, rVersion, rProject, dryRun));
+        config.setRadicle(new RadicleConfig(rUrl, rVersion, rProject, rPassphrase, dryRun));
     }
 
 }
