@@ -26,7 +26,7 @@
     <dockerPassword/>
     <dockerImageArchs/>
     <dockerBuildOutput/>
-    <surefire-plugin.version>3.1.2</surefire-plugin.version>
+    <surefire-plugin.version>3.2.1</surefire-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
