@@ -6,7 +6,7 @@
   <artifactId>radicle-github-migrate</artifactId>
   <version>0.4.0</version>
   <properties>
-    <checkstyle-plugin.version>3.3.0</checkstyle-plugin.version>
+    <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
     <checkstyle-tools.version>10.12.4</checkstyle-tools.version>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
