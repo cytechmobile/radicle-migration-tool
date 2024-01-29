@@ -7,7 +7,7 @@
   <version>0.4.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
-    <checkstyle-tools.version>10.12.6</checkstyle-tools.version>
+    <checkstyle-tools.version>10.13.0</checkstyle-tools.version>
     <compiler-plugin.version>3.12.1</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <maven.test.skip>true</maven.test.skip>
