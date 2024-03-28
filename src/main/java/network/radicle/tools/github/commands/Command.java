@@ -19,33 +19,33 @@ public class Command implements Runnable {
     public static final int PAGE_SIZE = 100;
 
     @CommandLine.Option(
-            names = {"-gv", "--gh-api-version"},
+            names = {"-gv", "--github-api-version"},
             defaultValue = "${GH_API_VERSION:-2022-11-28}",
             description = "The version of the GitHub REST API (default: 2022-11-28).")
     String gVersion;
 
     @CommandLine.Option(
-            names = {"-gu", "--gh-api-url"},
+            names = {"-gu", "--github-api-url"},
             defaultValue = "${GH_API_URL:-https://api.github.com}",
             description = "The base url of the GitHub REST API (default: https://api.github.com).")
     URL gUrl;
 
     @CommandLine.Option(
-            names = {"-gr", "--gh-repo"},
+            names = {"-gr", "--github-repo"},
             required = true,
             defaultValue = "${GH_REPO}",
             description = "The source GitHub repo.")
     String gRepo;
 
     @CommandLine.Option(
-            names = {"-go", "--gh-repo-owner"},
+            names = {"-go", "--github-repo-owner"},
             required = true,
             defaultValue = "${GH_OWNER}",
             description = "The owner of the source GitHub repo.")
     String gOwner;
 
     @CommandLine.Option(
-            names = {"-gt", "--gh-token"},
+            names = {"-gt", "--github-token"},
             required = true,
             interactive = true,
             defaultValue = "${GH_TOKEN}",
@@ -53,32 +53,32 @@ public class Command implements Runnable {
     String gToken;
 
     @CommandLine.Option(
-            names = {"-gs", "--gh-session"},
+            names = {"-gs", "--github-session"},
             defaultValue = "${GH_SESSION}",
             description = "The value of the user_session cookie. It is utilized for migrating assets and files from a private GitHub repository.")
     String gSession;
 
     @CommandLine.Option(
-            names = {"-rv", "--rad-api-version"},
+            names = {"-rv", "--radicle-api-version"},
             defaultValue = "${RAD_API_VERSION:-v1}",
             description = "The version of the Radicle HTTP API (default: v1).")
     String rVersion;
 
     @CommandLine.Option(
-            names = {"-ru", "--rad-api-url"},
+            names = {"-ru", "--radicle-api-url"},
             defaultValue = "${RAD_API_URL:-http://localhost:8080/api}",
             description = "The base url of Radicle HTTP API (default: http://localhost:8080/api).")
     URL rUrl;
 
     @CommandLine.Option(
-            names = {"-rp", "--rad-project"},
+            names = {"-rp", "--radicle-project"},
             required = true,
             defaultValue = "${RAD_PROJECT}",
             description = "The target Radicle project.")
     String rProject;
 
     @CommandLine.Option(
-            names = {"-rh", "--rad-passphrase"},
+            names = {"-rh", "--radicle-passphrase"},
             required = true,
             interactive = true,
             defaultValue = "${RAD_PASSPHRASE}",
