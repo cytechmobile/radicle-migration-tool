@@ -159,6 +159,11 @@ public class MigrationService extends AbstractMigrationService {
         }
     }
 
+    public boolean migrateWiki() {
+        logger.info("MIGRATING WIKI PAGES");
+        return true;
+    }
+
     private List<Comment> getCommentsFor(Issue issue) throws Exception {
         var page = 1;
         var hasMore = true;
