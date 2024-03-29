@@ -77,7 +77,12 @@ public class CliService {
                 }
 
                 while ((line = errorReader.readLine()) != null) {
-                    logger.debug("{}", line);
+                    if (exitCode == 0) {
+                        logger.debug("{}", line);
+                    } else {
+                        logger.error("{}", line);
+                    }
+
                 }
             }
 

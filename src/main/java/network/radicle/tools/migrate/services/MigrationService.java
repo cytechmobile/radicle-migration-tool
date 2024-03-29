@@ -27,7 +27,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static network.radicle.tools.migrate.core.github.Issue.*;
+import static network.radicle.tools.migrate.core.github.Issue.STATE_COMPLETED;
+import static network.radicle.tools.migrate.core.github.Issue.STATE_OPEN;
+import static network.radicle.tools.migrate.core.github.Issue.STATE_OTHER;
+import static network.radicle.tools.migrate.core.github.Issue.STATE_SOLVED;
 
 @ApplicationScoped
 public class MigrationService extends AbstractMigrationService {
@@ -157,9 +160,14 @@ public class MigrationService extends AbstractMigrationService {
     }
 
     public boolean migrateWiki() {
-        logger.info("MIGRATING WIKI PAGES");
+        var owner = config.getGithub().owner();
+        var repo = config.getGithub().repo();
+        var token = config.getGithub().token();
+        var path = config.getRadicle().path();
 
-        return true;
+        var resp = github.execSubtreeCmd(owner, repo, token, path);
+
+        return !Strings.isNullOrEmpty(resp);
     }
 
     private List<Comment> getCommentsFor(Issue issue) throws Exception {

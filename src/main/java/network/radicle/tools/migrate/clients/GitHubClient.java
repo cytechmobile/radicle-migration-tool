@@ -165,26 +165,37 @@ public class GitHubClient implements IGitHubClient {
 
     @Override
     public String execSubtreeCmd(String owner, String repo, String token, String path) {
-        var wikiRepo = getRepoUrl(token) + ".wiki.git";
-        var command = "";
+        logger.info("Migration started for {}", getRepoUrl("") + ".wiki.git");
 
-        if (!Files.exists(Path.of(path, ".wiki"))) {
-            command = "git -C " + path + " subtree add -m 'Migrating wiki' --prefix=.wiki/ " + wikiRepo + " master";
-        } else {
-            command = "git -C " + path + " subtree pull -m 'Migrating wiki' --prefix=.wiki/ " + wikiRepo + " master";
-        }
-
-        var payload = cli.execCommand(command, null);
-        if (Strings.isNullOrEmpty(payload)) {
-            logger.debug("git subtree add command failed.");
+        var command = getCommand(path, token);
+        var response = cli.execCommand(command, null);
+        if (Strings.isNullOrEmpty(response)) {
+            var cmd = getCommand(path, "<token>");
+            logger.error(cmd);
             return null;
         }
+        logger.debug(response);
+        logger.info("Wiki migrated to {}", Path.of(path, ".wiki"));
 
-        return payload;
+        return response;
     }
 
     public String getRepoUrl(String token) {
         var tokenPrefix = Strings.isNullOrEmpty(token) ? "" : token + "@";
-        return "https:// " + tokenPrefix + "github.com/" + config.getGithub().owner() + "/" + config.getGithub().repo();
+        return "https://" + tokenPrefix + "github.com/" + config.getGithub().owner() + "/" + config.getGithub().repo();
+    }
+
+    public String getCommand(String path, String token) {
+        var wikiRepo = getRepoUrl(token) + ".wiki.git";
+        var command = "";
+
+        var targetFolder = Path.of(path, ".wiki");
+        if (!Files.exists(targetFolder)) {
+            command = "git -C " + path + " subtree add -m 'Merge wiki' --prefix=.wiki/ " + wikiRepo + " master";
+        } else {
+            command = "git -C " + path + " subtree pull -m 'Merge wiki' --prefix=.wiki/ " + wikiRepo + " master";
+        }
+
+        return command;
     }
 }

@@ -1,9 +1,9 @@
-package network.radicle.tools.github.commands;
+package network.radicle.tools.migrate.commands;
 
 import io.quarkus.runtime.Quarkus;
 import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import network.radicle.tools.github.services.AppStateService;
+import network.radicle.tools.migrate.Config.GitHubConfig;
+import network.radicle.tools.migrate.Config.RadicleConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -20,18 +20,16 @@ import picocli.CommandLine;
 public class WikiCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(WikiCommand.class);
 
-    @Inject
-    AppStateService appStateService;
+    @CommandLine.Option(
+            names = {"-rpp", "--radicle-project-path"},
+            order = 170,
+            required = true,
+            defaultValue = "${RAD_PROJECT_PATH}",
+            description = "The absolute path the target radicle project in the local file system.")
+    String rProjectPath;
 
     @Override
-    public void run() {
-        super.run();
-
-        if (!appStateService.isInitialized()) {
-            Quarkus.asyncExit(1);
-            return;
-        }
-
+    public void exec() {
         var result = service.migrateWiki();
         if (!result) {
             logger.error("Migration failed.");
@@ -40,7 +38,17 @@ public class WikiCommand extends Command {
             logger.info("Migration finished successfully!");
             Quarkus.asyncExit(0);
         }
+    }
 
+    @Override
+    public GitHubConfig getGithubConfig() {
+        return new GitHubConfig(null, ghRepo.gToken, null, null, ghRepo.gOwner,
+                ghRepo.gRepo, null, PAGE_SIZE);
+    }
+
+    @Override
+    public RadicleConfig getRadicleConfig() {
+        return new RadicleConfig(null, null, null, null, rProjectPath, dryRun);
     }
 
 }

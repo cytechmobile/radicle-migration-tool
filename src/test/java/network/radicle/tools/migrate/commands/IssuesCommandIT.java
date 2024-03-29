@@ -1,32 +1,17 @@
 package network.radicle.tools.migrate.commands;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.main.LaunchResult;
 import io.quarkus.test.junit.main.QuarkusMainLauncher;
 import io.quarkus.test.junit.main.QuarkusMainTest;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.inject.Singleton;
-import network.radicle.tools.migrate.Config;
-import network.radicle.tools.migrate.clients.IGitHubClient;
-import network.radicle.tools.migrate.clients.IRadicleClient;
-import network.radicle.tools.migrate.core.github.*;
-import network.radicle.tools.migrate.core.radicle.Session;
-import network.radicle.tools.migrate.core.radicle.actions.Action;
-import network.radicle.tools.migrate.core.radicle.actions.EmbedTest;
+import network.radicle.tools.migrate.core.github.CommentTest;
+import network.radicle.tools.migrate.core.github.Event;
+import network.radicle.tools.migrate.core.github.EventTest;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @QuarkusMainTest
-@TestProfile(IssuesCommandIT.GithubTestProfile.class)
+@io.quarkus.test.junit.TestProfile(MockedTestProfile.class)
 public class IssuesCommandIT {
     @Test
     public void testSuccess(QuarkusMainLauncher launcher) {
@@ -158,98 +143,4 @@ public class IssuesCommandIT {
         assertThat(result.getOutput()).doesNotContain("Partially or non migrated issues");
         assertThat(result.getOutput()).contains("Migration finished successfully");
     }
-
-    public static class GithubTestProfile implements QuarkusTestProfile {
-        @Override
-        public Set<Class<?>> getEnabledAlternatives() {
-            return Set.of(MockedGitHubClient.class, MockedRadicleClient.class);
-        }
-    }
-
-    @Alternative
-    @Singleton
-    public static class MockedGitHubClient implements IGitHubClient {
-        private static final Logger logger = LoggerFactory.getLogger(MockedGitHubClient.class);
-
-        @Override
-        public List<Issue> getIssues(int page, Config.Filters filters) {
-            var issues = IssueTest.loadGitHubIssues().stream()
-                    .filter(i -> {
-                        var matchesMilestone = filters.milestone() == null || (i.milestone != null && filters.milestone().equals(i.milestone.number));
-                        var matchesState = filters.state() == Command.State.all || filters.state().name().equals(i.state);
-                        var matchesAssignee = filters.assignee() == null || (i.assignee != null && filters.assignee().equals(i.assignee.login));
-                        var matchesAssignees = filters.assignee() == null ||
-                                !i.assignees.stream().filter(a -> a.login.equals(filters.assignee())).toList().isEmpty();
-                        var matchesCreator = filters.creator() == null || (i.user != null && filters.creator().equals(i.user.login));
-
-                        var filterLabels = filters.labels() == null ? List.of() :
-                                Arrays.stream(filters.labels().split(",")).toList();
-                        var issueLabels = i.labels.stream().map(l -> l.name).toList();
-
-                        var matchesLabels = filters.labels() == null ||
-                                !filterLabels.stream().filter(issueLabels::contains).toList().isEmpty();
-                        if (matchesLabels) {
-                            logger.debug("{} matches {}", filterLabels, issueLabels);
-                        }
-
-                        return matchesMilestone && matchesState && (matchesAssignee || matchesAssignees) &&
-                                matchesCreator && matchesLabels;
-                    }).toList();
-            logger.info("Returning {} issues for page {}", issues.size(), page);
-            return issues;
-        }
-
-        @Override
-        public List<Comment> getComments(long issueNumber, int page) {
-            var comments = CommentTest.loadGitHubComments();
-            logger.info("Returning {} comments for page {}", comments.size(), page);
-            return comments;
-        }
-
-        @Override
-        public List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
-            var events = EventTest.loadGitHubEvents();
-            logger.info("Returning {} events for page {}", events.size(), page);
-            return events;
-        }
-
-        @Override
-        public Commit getCommit(String commitId) throws Exception {
-            return CommitTest.generateGitHubCommit();
-        }
-
-        @Override
-        public String getAssetOrFile(String url) {
-            var embed = EmbedTest.generateEmbed();
-            return embed != null ? embed.content : null;
-        }
-    }
-
-    @Alternative
-    @Singleton
-    public static class MockedRadicleClient implements IRadicleClient {
-        private static final Logger logger = LoggerFactory.getLogger(MockedRadicleClient.class);
-
-        @Override
-        public Session createSession() {
-            var session = new Session();
-            session.id = UUID.randomUUID().toString();
-            logger.info("Creating session: {}", session.id);
-            return session;
-        }
-
-        @Override
-        public String createIssue(Session session, network.radicle.tools.migrate.core.radicle.Issue issue) {
-            var id = UUID.randomUUID().toString();
-            logger.info("Creating issue: {}", id);
-            return id;
-        }
-
-        @Override
-        public boolean updateIssue(Session session, String id, Action action) {
-            logger.info("Updating issue: {} using action: {}", id, action);
-            return true;
-        }
-    }
-
 }
