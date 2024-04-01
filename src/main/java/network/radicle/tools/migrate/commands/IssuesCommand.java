@@ -29,6 +29,14 @@ public class IssuesCommand extends Command {
     @CommandLine.Mixin RadicleApi radApi;
     @CommandLine.Mixin RadicleRepo radRepo;
 
+    @CommandLine.Option(
+            names = {"-dr", "--dry-run"},
+            order = 200,
+            defaultValue = "${DRY_RUN:false}",
+            description = "Run the whole migration process without actually creating the issues in the target Radicle project..")
+    boolean dryRun;
+
+
     @Inject
     AppStateService appStateService;
 

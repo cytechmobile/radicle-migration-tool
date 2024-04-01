@@ -14,13 +14,6 @@ import picocli.CommandLine;
 public class Command implements Runnable {
     public static final int PAGE_SIZE = 100;
 
-    @CommandLine.Option(
-            names = {"-dr", "--dry-run"},
-            order = 200,
-            defaultValue = "${DRY_RUN:false}",
-            description = "Run the whole migration process without actually creating the issues in the target Radicle project..")
-    boolean dryRun;
-
     @CommandLine.Mixin GithubRepo ghRepo;
 
     public enum State { open, closed, all }
