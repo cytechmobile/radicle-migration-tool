@@ -25,7 +25,7 @@ public class WikiCommand extends Command {
             order = 170,
             required = true,
             defaultValue = "${RAD_PROJECT_PATH}",
-            description = "The absolute path the target radicle project in the local file system.")
+            description = "The absolute path to the target Radicle project in your local file system.")
     String rProjectPath;
 
     @Override
@@ -48,7 +48,7 @@ public class WikiCommand extends Command {
 
     @Override
     public RadicleConfig getRadicleConfig() {
-        return new RadicleConfig(null, null, null, null, rProjectPath, dryRun);
+        return new RadicleConfig(null, null, null, null, rProjectPath, false);
     }
 
 }
