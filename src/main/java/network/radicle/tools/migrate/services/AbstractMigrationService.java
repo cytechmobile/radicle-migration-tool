@@ -7,8 +7,7 @@ import java.time.Instant;
 
 public abstract class AbstractMigrationService {
 
-    @Inject
-    AppStateService appStateService;
+    @Inject AppStateService appStateService;
 
     public abstract String getLastRunPropertyName();
 

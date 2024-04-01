@@ -16,16 +16,16 @@ public class EventTest {
     public void testSerializationOfSingleEvent() throws Exception {
         var event = generateGitHubEvent();
         var json = IssueTest.MAPPER.writeValueAsString(event);
-        var c = IssueTest.MAPPER.readValue(json, Event.class);
+        var c = IssueTest.MAPPER.readValue(json, GitHubEvent.class);
 
         assertThat(c).isNotNull().usingRecursiveComparison().isEqualTo(event);
     }
 
     @Test
     public void testSerializationOfManyEvents() {
-        List<Event> events = loadGitHubEvents();
+        List<GitHubEvent> events = loadGitHubEvents();
         assertThat(events.size()).isNotZero();
-        Event event = events.get(0);
+        GitHubEvent event = events.get(0);
         assertThat(event.event).isNotNull().isNotEmpty();
         assertThat(event.createdAt).isNotNull();
     }
@@ -38,11 +38,11 @@ public class EventTest {
         assertThat(formatted).isEqualTo(expected);
     }
 
-    public static Event generateGitHubEvent() {
+    public static GitHubEvent generateGitHubEvent() {
         try {
             var seed = System.currentTimeMillis();
             var file = new File("src/test/resources/github/event.json");
-            var event = IssueTest.MAPPER.readValue(file, Event.class);
+            var event = IssueTest.MAPPER.readValue(file, GitHubEvent.class);
             event.id = event.id + seed;
             event.createdAt = Instant.now().minus(1, ChronoUnit.HOURS);
             event.actor.id = event.actor.id + seed;
@@ -52,7 +52,7 @@ public class EventTest {
         }
     }
 
-    public static List<Event> loadGitHubEvents() {
+    public static List<GitHubEvent> loadGitHubEvents() {
         try {
             var file = new File("src/test/resources/github/events.json");
             return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });

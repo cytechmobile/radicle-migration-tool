@@ -1,3 +1,4 @@
+
 package network.radicle.tools.migrate.core.github;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,24 +7,23 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CommitMetadata {
-
+public class GitHubPullRequest {
     @JsonProperty("url")
     public String url;
-    @JsonProperty("author")
-    public GitHubUser author;
-    @JsonProperty("committer")
-    public GitHubUser committer;
-    @JsonProperty("message")
-    public String message;
+    @JsonProperty("html_url")
+    public String htmlUrl;
+    @JsonProperty("diff_url")
+    public String diffUrl;
+    @JsonProperty("patch_url")
+    public String patchUrl;
 
     @Override
     public String toString() {
-        return "CommitMetadata{" +
+        return "PullRequest{" +
                 "url='" + url + '\'' +
-                ", author=" + author +
-                ", committer=" + committer +
-                ", message='" + message + '\'' +
+                ", htmlUrl='" + htmlUrl + '\'' +
+                ", diffUrl='" + diffUrl + '\'' +
+                ", patchUrl='" + patchUrl + '\'' +
                 '}';
     }
 }

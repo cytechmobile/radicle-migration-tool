@@ -1,7 +1,7 @@
 package network.radicle.tools.migrate.core.github;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import network.radicle.tools.migrate.services.MarkdownService;
+import network.radicle.tools.migrate.services.github.GitHubMarkdownService;
 import network.radicle.tools.migrate.services.MarkdownService.MarkdownLink;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -21,16 +21,16 @@ public class CommentTest {
     public void testSerializationOfSingleComment() throws Exception {
         var comment = generateGitHubComment();
         var json = IssueTest.MAPPER.writeValueAsString(comment);
-        var c = IssueTest.MAPPER.readValue(json, Comment.class);
+        var c = IssueTest.MAPPER.readValue(json, GitHubComment.class);
 
         assertThat(c).isNotNull().usingRecursiveComparison().isEqualTo(comment);
     }
 
     @Test
     public void testSerializationOfManyComments() {
-        List<Comment> comments = loadGitHubComments();
+        List<GitHubComment> comments = loadGitHubComments();
         assertThat(comments.size()).isNotZero();
-        Comment comment = comments.get(0);
+        GitHubComment comment = comments.get(0);
         assertThat(comment.body).isNotNull().isNotEmpty();
         assertThat(comment.createdAt).isNotNull();
     }
@@ -39,7 +39,7 @@ public class CommentTest {
     public void testMarkdownLinkParsingFromComments() throws Exception {
         var comments = loadGitHubComments();
         var markdownWithAsset = comments.get(0).body;
-        var markdownService = new MarkdownService();
+        var markdownService = new GitHubMarkdownService();
         var actual = markdownService.extractUrls(markdownWithAsset);
 
         var expected = List.of(
@@ -51,11 +51,11 @@ public class CommentTest {
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
-    public static Comment generateGitHubComment() {
+    public static GitHubComment generateGitHubComment() {
         try {
             var seed = System.currentTimeMillis();
             var file = new File("src/test/resources/github/comment.json");
-            var comment = IssueTest.MAPPER.readValue(file, Comment.class);
+            var comment = IssueTest.MAPPER.readValue(file, GitHubComment.class);
             comment.id = comment.id + seed;
             comment.createdAt = Instant.now().minus(1, ChronoUnit.HOURS);
             comment.updatedAt = Instant.now();
@@ -66,7 +66,7 @@ public class CommentTest {
         }
     }
 
-    public static List<Comment> loadGitHubComments() {
+    public static List<GitHubComment> loadGitHubComments() {
         try {
             var file = new File("src/test/resources/github/comments.json");
             return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });

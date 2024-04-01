@@ -2,7 +2,7 @@ package network.radicle.tools.migrate.handlers;
 
 import com.google.common.base.Strings;
 import jakarta.ws.rs.core.Response;
-import network.radicle.tools.migrate.clients.RadicleClient;
+import network.radicle.tools.migrate.clients.radicle.RadicleClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

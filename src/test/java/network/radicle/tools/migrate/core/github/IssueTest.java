@@ -24,25 +24,25 @@ public class IssueTest {
     public void testSerializationOfSingleIssue() throws Exception {
         var issue = generateGitHubIssue();
         var json = MAPPER.writeValueAsString(issue);
-        var i = MAPPER.readValue(json, Issue.class);
+        var i = MAPPER.readValue(json, GitHubIssue.class);
 
         assertThat(i).isNotNull().usingRecursiveComparison().isEqualTo(issue);
     }
 
     @Test
     public void testSerializationOfManyIssues() {
-        List<Issue> issues = loadGitHubIssues();
+        List<GitHubIssue> issues = loadGitHubIssues();
         assertThat(issues.size()).isNotZero();
-        Issue issue = issues.get(0);
+        GitHubIssue issue = issues.get(0);
         assertThat(issue.title).isNotNull().isNotEmpty();
         assertThat(issue.createdAt).isNotNull();
     }
 
-    public static Issue generateGitHubIssue() {
+    public static GitHubIssue generateGitHubIssue() {
         try {
             var seed = System.currentTimeMillis();
             var file = new File("src/test/resources/github/issue.json");
-            Issue issue = MAPPER.readValue(file, Issue.class);
+            GitHubIssue issue = MAPPER.readValue(file, GitHubIssue.class);
             issue.id = issue.id + seed;
             issue.createdAt = Instant.now().minus(1, ChronoUnit.HOURS);
             issue.updatedAt = Instant.now();
@@ -53,7 +53,7 @@ public class IssueTest {
         }
     }
 
-    public static List<Issue> loadGitHubIssues() {
+    public static List<GitHubIssue> loadGitHubIssues() {
         try {
             var file = new File("src/test/resources/github/issues.json");
             return MAPPER.readValue(file, new TypeReference<>() { });

@@ -18,7 +18,7 @@ public class CommitTest {
     public void testSerializationOfSingleCommit() throws Exception {
         var commit = generateGitHubCommit();
         var json = IssueTest.MAPPER.writeValueAsString(commit);
-        var c = IssueTest.MAPPER.readValue(json, Commit.class);
+        var c = IssueTest.MAPPER.readValue(json, GitHubCommit.class);
 
         assertThat(c).isNotNull().usingRecursiveComparison().isEqualTo(commit);
     }
@@ -32,11 +32,11 @@ public class CommitTest {
         assertThat(commit.metadata.message).isNotNull().isNotEmpty();
     }
 
-    public static Commit generateGitHubCommit() {
+    public static GitHubCommit generateGitHubCommit() {
         try {
             var seed = System.currentTimeMillis();
             var file = new File("src/test/resources/github/commit.json");
-            var commit = IssueTest.MAPPER.readValue(file, Commit.class);
+            var commit = IssueTest.MAPPER.readValue(file, GitHubCommit.class);
             commit.sha = commit.sha + seed;
             commit.metadata.message = commit.metadata.message + seed;
             commit.author.id = commit.author.id + seed;
@@ -47,7 +47,7 @@ public class CommitTest {
         }
     }
 
-    public static List<Commit> loadGitHubCommits() {
+    public static List<GitHubCommit> loadGitHubCommits() {
         try {
             var file = new File("src/test/resources/github/commits.json");
             return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });

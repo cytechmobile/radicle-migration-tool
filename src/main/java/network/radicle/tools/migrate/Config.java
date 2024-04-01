@@ -9,14 +9,25 @@ import java.time.Instant;
 
 @ApplicationScoped
 public class Config {
+    private GitLabConfig gitlab;
     private GitHubConfig github;
     private RadicleConfig radicle;
 
     public Config() {
     }
 
+    public Config(RadicleConfig radConfig, GitHubConfig ghConfig, GitLabConfig glConfig) {
+        this.radicle = radConfig;
+        this.github = ghConfig;
+        this.gitlab = glConfig;
+    }
+
     public GitHubConfig getGithub() {
         return github;
+    }
+
+    public GitLabConfig getGitlab() {
+        return gitlab;
     }
 
     public RadicleConfig getRadicle() {
@@ -27,6 +38,10 @@ public class Config {
         this.github = github;
     }
 
+    public void setGitlab(GitLabConfig gitlab) {
+        this.gitlab = gitlab;
+    }
+
     public void setRadicle(RadicleConfig radicle) {
         this.radicle = radicle;
     }
@@ -35,11 +50,12 @@ public class Config {
     public String toString() {
         return "Config{" +
                 "github=" + github +
+                "gitlab=" + gitlab +
                 ", radicle=" + radicle +
                 '}';
     }
 
-    public record GitHubConfig(String session, String token, URL url, String version, String owner, String repo,
+    public record GitHubConfig(String domain, String session, String token, URL url, String version, String owner, String repo,
                                Filters filters, int pageSize) {
         @Override
         public String toString() {
@@ -53,6 +69,23 @@ public class Config {
                     '}';
         }
     }
+
+    public record GitLabConfig(String domain, String session, String token, URL url, String version, String namespace, String project,
+                               Filters filters, int pageSize) {
+        @Override
+        public String toString() {
+            return "GitLabConfig{" +
+                    "domain='" + domain + '\'' +
+                    ", url=" + url +
+                    ", version='" + version + '\'' +
+                    ", namespace='" + namespace + '\'' +
+                    ", project='" + project + '\'' +
+                    ", filters=" + filters +
+                    ", pageSize=" + pageSize +
+                    '}';
+        }
+    }
+
     public record RadicleConfig(URL url, String version, String project, String passphrase, String path,
                                 Boolean dryRun) {
 
