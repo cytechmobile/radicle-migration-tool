@@ -1,5 +1,9 @@
 # radicle-github-migrate Changelog
 
+## 0.5.0 - 2024-04-01
+### Features
+* Added support for migrating GitHub Wikis. The tool provides a convenient way to migrate your GitHub Wiki to your Radicle project under the `.wiki` directory, offering a quick solution until Radicle potentially introduces support for Wikis.
+
 ## 0.4.0 - 2023-10-19
 ### Features
 * Added support for migrating the inline assets/files discovered within GitHub issues and comments as Radicle embeds. 

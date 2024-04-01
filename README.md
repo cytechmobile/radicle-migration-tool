@@ -60,7 +60,7 @@ The tool offers several important features regarding the issues migration, inclu
 * It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
 * It is available in different binary forms, providing flexibility in how it can be utilized.
 
-Additionally, the tool provides a quick way to migrate your GitHub Wiki to your Radicle project under the `.wiki` directory, offering a quick solution until Radicle potentially introduces support for Wikis. Notable features include:
+Additionally, the tool provides a convenient way to migrate your GitHub Wiki to your Radicle project under the `.wiki` directory, offering a quick solution until Radicle potentially introduces support for Wikis. Notable features include:
 * Preservation of the Wiki's repository commit history through the use of the `git subtree` command.
 * Facilitation of ongoing migration for any updates in the Wiki's repository via the `git subtree pull` command. 
 
