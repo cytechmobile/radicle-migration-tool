@@ -11,7 +11,6 @@ import jakarta.ws.rs.core.Response;
 import network.radicle.tools.migrate.Config;
 import network.radicle.tools.migrate.commands.Command.State;
 import network.radicle.tools.migrate.core.gitlab.GitLabComment;
-import network.radicle.tools.migrate.core.gitlab.GitLabCommit;
 import network.radicle.tools.migrate.core.gitlab.GitLabEvent;
 import network.radicle.tools.migrate.core.gitlab.GitLabIssue;
 import network.radicle.tools.migrate.handlers.ResponseHandler;
@@ -108,26 +107,6 @@ public class GitLabClient implements IGitLabClient {
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/json")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGitlab().token()))
-                .get()) {
-
-            var json = ResponseHandler.handleResponse(resp);
-            return mapper.readValue(json, new TypeReference<>() {
-            });
-        }
-    }
-
-    @Override
-    public GitLabCommit getCommit(String commitId) throws Exception {
-        var url = config.getGitlab().url() + "/repos/" + config.getGitlab().namespace() + "/" + config.getGitlab().project() +
-                "/commits/" + commitId;
-
-        try (var resp = client.target(url)
-                .queryParam("per_page", config.getGitlab().pageSize())
-                .queryParam("page", 1)
-                .request()
-                .header(HttpHeaders.ACCEPT, "application/vnd.gitlab+json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGitlab().token()))
-                .header("X-GitHub-Api-Version", config.getGitlab().version())
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);

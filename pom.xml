@@ -206,6 +206,7 @@
         <configuration>
           <environmentVariables>
             <GH_TOKEN>test</GH_TOKEN>
+            <GL_TOKEN>test</GL_TOKEN>
             <RAD_PASSPHRASE>test</RAD_PASSPHRASE>
           </environmentVariables>
         </configuration>

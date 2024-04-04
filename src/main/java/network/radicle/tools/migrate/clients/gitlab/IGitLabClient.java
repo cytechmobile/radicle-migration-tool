@@ -2,7 +2,6 @@ package network.radicle.tools.migrate.clients.gitlab;
 
 import network.radicle.tools.migrate.Config;
 import network.radicle.tools.migrate.core.gitlab.GitLabComment;
-import network.radicle.tools.migrate.core.gitlab.GitLabCommit;
 import network.radicle.tools.migrate.core.gitlab.GitLabEvent;
 import network.radicle.tools.migrate.core.gitlab.GitLabEvent.Type;
 import network.radicle.tools.migrate.core.gitlab.GitLabIssue;
@@ -15,8 +14,6 @@ public interface IGitLabClient {
     List<GitLabComment> getComments(long issueNumber, int page) throws Exception;
 
     List<GitLabEvent> getEvents(long issueNumber, int page, Type type) throws Exception;
-
-    GitLabCommit getCommit(String commitId) throws Exception;
 
     String getAssetOrFile(String url);
 }

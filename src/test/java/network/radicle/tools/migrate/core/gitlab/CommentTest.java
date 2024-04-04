@@ -1,8 +1,8 @@
-package network.radicle.tools.migrate.core.github;
+package network.radicle.tools.migrate.core.gitlab;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import network.radicle.tools.migrate.services.github.GitHubMarkdownService;
 import network.radicle.tools.migrate.services.MarkdownService.MarkdownLink;
+import network.radicle.tools.migrate.services.gitlab.GitLabMarkdownService;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,56 +19,55 @@ public class CommentTest {
 
     @Test
     public void testSerializationOfSingleComment() throws Exception {
-        var comment = generateGitHubComment();
+        var comment = generateGitLabComment();
         var json = IssueTest.MAPPER.writeValueAsString(comment);
-        var c = IssueTest.MAPPER.readValue(json, GitHubComment.class);
+        var c = IssueTest.MAPPER.readValue(json, GitLabComment.class);
 
         assertThat(c).isNotNull().usingRecursiveComparison().isEqualTo(comment);
     }
 
     @Test
     public void testSerializationOfManyComments() {
-        List<GitHubComment> comments = loadGitHubComments();
+        List<GitLabComment> comments = loadGitLabComments();
         assertThat(comments.size()).isNotZero();
-        GitHubComment comment = comments.get(0);
+        GitLabComment comment = comments.get(0);
         assertThat(comment.body).isNotNull().isNotEmpty();
         assertThat(comment.createdAt).isNotNull();
     }
 
     @Test
     public void testMarkdownLinkParsingFromComments() throws Exception {
-        var comments = loadGitHubComments();
+        var comments = loadGitLabComments();
         var markdownWithAsset = comments.get(0).body;
-        var markdownService = new GitHubMarkdownService();
+        var markdownService = new GitLabMarkdownService();
         var actual = markdownService.extractUrls(markdownWithAsset);
 
         var expected = List.of(
-                new MarkdownLink("Sample Screenshot", "https://github.com/testowner/testrepo/assets/2813615/23bfc62e-791d-427b-bdab-aa5ea3abe81f"),
-                new MarkdownLink("1f339325af4161591a1a1a206a2fc5e66.pdf", "https://github.com/testowner/testrepo/files/12895629/1f339325af4161591a1a1a206a2fc5e66.pdf")
+                new MarkdownLink("Dwarf", "/uploads/2494c32d7f4b94a372776fcaa6a801bd/dwarf.png")
         );
 
         assertThat(actual.size()).isNotZero().isEqualTo(expected.size());
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
-    public static GitHubComment generateGitHubComment() {
+    public static GitLabComment generateGitLabComment() {
         try {
             var seed = System.currentTimeMillis();
-            var file = new File("src/test/resources/github/comment.json");
-            var comment = IssueTest.MAPPER.readValue(file, GitHubComment.class);
+            var file = new File("src/test/resources/gitlab/comment.json");
+            var comment = IssueTest.MAPPER.readValue(file, GitLabComment.class);
             comment.id = comment.id + seed;
             comment.createdAt = Instant.now().minus(1, ChronoUnit.HOURS);
             comment.updatedAt = Instant.now();
-            comment.user.id = comment.user.id + seed;
+            comment.author.id = comment.author.id + seed;
             return comment;
         } catch (Exception ex) {
             return null;
         }
     }
 
-    public static List<GitHubComment> loadGitHubComments() {
+    public static List<GitLabComment> loadGitLabComments() {
         try {
-            var file = new File("src/test/resources/github/comments.json");
+            var file = new File("src/test/resources/gitlab/comments.json");
             return IssueTest.MAPPER.readValue(file, new TypeReference<>() { });
         } catch (Exception ex) {
             return List.of();
