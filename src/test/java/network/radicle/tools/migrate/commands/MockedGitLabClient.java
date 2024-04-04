@@ -19,7 +19,6 @@ public class MockedGitLabClient implements IGitLabClient {
 
     @Override
     public List<GitLabIssue> getIssues(int page, Config.Filters filters) {
-        logger.info("MockedGitLabClient MockedGitLabClient MockedGitLabClient");
         var issues = IssueTest.loadGitLabIssues().stream()
                 .filter(i -> {
                     var matchesMilestone = filters.milestone() == null || (i.milestone != null && String.valueOf(filters.milestone()).equals(i.milestone.title));

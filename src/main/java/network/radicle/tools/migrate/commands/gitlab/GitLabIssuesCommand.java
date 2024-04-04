@@ -27,7 +27,8 @@ import picocli.CommandLine;
         synopsisHeading = "",
         descriptionHeading = "%n@|bold,underline Description|@:%n",
         parameterListHeading = "%n@|bold,underline Parameters|@:%n",
-        optionListHeading = "%n@|bold,underline Options|@:%n")
+        optionListHeading = "%n@|bold,underline Options|@:%n",
+        resourceBundle = "network.radicle.tools.migrate.commands.gitlab.Messages")
 public class GitLabIssuesCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(GitLabIssuesCommand.class);
 

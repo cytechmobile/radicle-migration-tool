@@ -49,23 +49,13 @@ public class GitHubIssuesCommandIT {
     public void testMilestoneFilter(QuarkusMainLauncher launcher) {
         var sinceOption = "1970-01-01T00:00:00+00:00";
 
-        var milestone = 1;
+        var milestone = "1";
         var result = launcher.launch("github", "issues", "-go=testOwner", "-gr=testRepo", "-rp=testProject",
                 "-fs=" + sinceOption, "-fm=" + milestone);
 
         var expectedIssues = 1;
 
         verifyOutput(result, expectedIssues);
-    }
-
-    @Test
-    public void testMilestoneFilterValidation(QuarkusMainLauncher launcher) {
-        var milestone = "invalid";
-        var result = launcher.launch("github", "issues", "-go=testOwner", "-gr=testRepo", "-rp=testProject",
-                "-fm=" + milestone);
-
-        assertThat(result.exitCode()).isNotZero();
-        assertThat(result.getErrorOutput()).contains("Invalid value for option '--filter-milestone'");
     }
 
     @Test

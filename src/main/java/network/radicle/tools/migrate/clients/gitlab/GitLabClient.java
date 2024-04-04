@@ -43,7 +43,7 @@ public class GitLabClient implements IGitLabClient {
 
         var url = config.getGitlab().url() + "/" + config.getGitlab().version() + "/projects/" + id + "/issues";
 
-        var milestone = filters.milestone() != null ? filters.milestone().toString() : null;
+        var milestone = filters.milestone() != null ? filters.milestone() : null;
         var state = filters.state() != null ? filters.state().name() : State.all.name();
         state = state.equals(State.open.name()) ? "opened" : state;
         try (var resp = client.target(url)

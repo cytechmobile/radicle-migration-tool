@@ -36,7 +36,7 @@ public class Filters {
             order = 140,
             defaultValue = "${FILTER_MILESTONE}",
             description = "Migrate issues belonging to the given milestone number (example: 3).")
-    public Integer fMilestone;
+    public String fMilestone;
 
     @CommandLine.Option(
             names = {"-fa", "--filter-assignee"},

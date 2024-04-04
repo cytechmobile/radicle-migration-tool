@@ -21,7 +21,7 @@ public class MockedGitHubClient implements IGitHubClient {
     public List<GitHubIssue> getIssues(int page, Config.Filters filters) {
         var issues = IssueTest.loadGitHubIssues().stream()
                 .filter(i -> {
-                    var matchesMilestone = filters.milestone() == null || (i.milestone != null && filters.milestone().equals(i.milestone.number));
+                    var matchesMilestone = filters.milestone() == null || (i.milestone != null && filters.milestone().equals(String.valueOf(i.milestone.number)));
                     var matchesState = filters.state() == Command.State.all || filters.state().name().equals(i.state);
                     var matchesAssignee = filters.assignee() == null || (i.assignee != null && filters.assignee().equals(i.assignee.login));
                     var matchesAssignees = filters.assignee() == null ||

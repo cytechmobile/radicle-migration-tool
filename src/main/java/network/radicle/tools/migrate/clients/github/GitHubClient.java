@@ -41,7 +41,7 @@ public class GitHubClient implements IGitHubClient {
         var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
                 "/issues";
 
-        var milestone = filters.milestone() != null ? filters.milestone().toString() : null;
+        var milestone = filters.milestone() != null ? filters.milestone() : null;
         var state = filters.state() != null ? filters.state().name() : State.all.name();
         try (var resp = client.target(url)
                 .queryParam("per_page", config.getGithub().pageSize())

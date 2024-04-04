@@ -101,7 +101,7 @@ public class Config {
         }
     }
 
-    public record Filters(Instant since, String labels, State state, Integer milestone, String assignee,
+    public record Filters(Instant since, String labels, State state, String milestone, String assignee,
                           String creator) {
         public Filters withSince(Instant s) {
             return new Filters(s, labels(), state(), milestone(), assignee(), creator());
