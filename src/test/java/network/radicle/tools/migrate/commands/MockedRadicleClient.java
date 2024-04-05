@@ -2,7 +2,7 @@ package network.radicle.tools.migrate.commands;
 
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
-import network.radicle.tools.migrate.clients.IRadicleClient;
+import network.radicle.tools.migrate.clients.radicle.IRadicleClient;
 import network.radicle.tools.migrate.core.radicle.Session;
 import network.radicle.tools.migrate.core.radicle.actions.Action;
 import org.slf4j.Logger;
@@ -19,20 +19,17 @@ public class MockedRadicleClient implements IRadicleClient {
     public Session createSession() {
         var session = new Session();
         session.id = UUID.randomUUID().toString();
-        logger.info("Creating session: {}", session.id);
         return session;
     }
 
     @Override
     public String createIssue(Session session, network.radicle.tools.migrate.core.radicle.Issue issue) {
         var id = UUID.randomUUID().toString();
-        logger.info("Creating issue: {}", id);
         return id;
     }
 
     @Override
     public boolean updateIssue(Session session, String id, Action action) {
-        logger.info("Updating issue: {} using action: {}", id, action);
         return true;
     }
 }

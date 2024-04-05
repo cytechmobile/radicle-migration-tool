@@ -15,170 +15,52 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import jakarta.enterprise.context.ApplicationScoped;
-import network.radicle.tools.migrate.core.github.Comment;
-import network.radicle.tools.migrate.core.github.Event;
-import network.radicle.tools.migrate.core.github.Issue;
-import network.radicle.tools.migrate.core.github.Timeline;
+import network.radicle.tools.migrate.core.Timeline;
+import network.radicle.tools.migrate.core.gitlab.GitLabComment;
+import network.radicle.tools.migrate.core.gitlab.GitLabEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static network.radicle.tools.migrate.core.github.Issue.METADATA_TITLE;
-
-@ApplicationScoped
-public class MarkdownService {
+public abstract class MarkdownService {
     public static final DateTimeFormatter DTF =
             DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"));
 
     private static final Logger logger = LoggerFactory.getLogger(MarkdownService.class);
 
-    public String getMetadata(Event event) {
-        var body = new ArrayList<String>();
 
-        //actor profile link
-        if (!Event.Type.CROSS_REFERENCED.value.equals(event.event)) {
-            body.add(link(bold(event.actor.login), event.actor.htmlUrl));
-        }
+    public String getBody(Timeline timeline) {
+        var body = Strings.nullToEmpty(timeline.getBody());
 
-        switch (Event.Type.from(event.event)) {
-            case ASSIGNED, UNASSIGNED -> {
-                body.add(event.event);
-                body.add(link(bold(event.assignee.login), event.assignee.htmlUrl));
-            }
-            case LABELED -> {
-                body.add("added the");
-                body.add(bold(event.label.name));
-                body.add("label");
-            }
-            case UNLABELED -> {
-                body.add("removed the");
-                body.add(bold(event.label.name));
-                body.add("label");
-            }
-            case MILESTONED -> {
-                body.add("added this to the");
-                body.add(bold(event.milestone.title));
-                body.add("milestone");
-            }
-            case DEMILESTONED -> {
-                body.add("removed this from the");
-                body.add(bold(event.milestone.title));
-                body.add("milestone");
-            }
-            case CLOSED -> {
-                body.add("closed this");
-                if (!Strings.isNullOrEmpty(event.stateReason)) {
-                    body.add("as " + event.stateReason);
-                }
-                if (event.commit != null) {
-                    var message = event.commit.metadata.message.split("\n")[0];
-                    body.add("in");
-                    body.add(event.commit.sha);
-                    body.add(link(bold(message), event.commit.htmlUrl));
-                }
-            }
-            case REOPENED -> body.add("reopened this");
-            case RENAMED -> {
-                body.add("changed the title");
-                body.add(strikethrough(event.rename.from));
-                body.add(bold(event.rename.to));
-            }
-            case CROSS_REFERENCED -> {
-                body.add("This was referenced by");
-                body.add(link(bold(event.source.issue.title + " #" + event.source.issue.number),
-                        event.source.issue.htmlUrl));
-            }
-            case MENTIONED -> body.add("was mentioned");
-            case REFERENCED -> {
-                body.add("added the commit");
-                body.add(event.commit.sha);
-                var message = event.commit.metadata.message.split("\n")[0];
-                body.add(link(bold(message), event.commit.htmlUrl));
-                body.add("that referenced this issue");
-            }
-            default -> body.add(event.event);
-        }
+        //GitLab comments include also some events. Let's format them properly.
+        if (timeline instanceof GitLabComment comment) {
+            if (body.startsWith(GitLabEvent.Type.ASSIGNED.value) ||
+                    body.startsWith(GitLabEvent.Type.UNASSIGNED.value) ||
+                    body.startsWith(GitLabEvent.Type.CHANGED_DUE_DATE.value) ||
+                    body.startsWith(GitLabEvent.Type.CHANGED_TYPE.value) ||
+                    body.startsWith(GitLabEvent.Type.RENAMED.value)) {
 
-        //escape : to properly get displayed in radicle web app
-        body.add("on " + escape(DTF.format(event.createdAt)));
-        return String.join(" ", body);
-    }
-
-    public String getMetadata(Comment comment) {
-        var header = new ArrayList<String>();
-        header.add("Number");
-        header.add("Created On");
-        header.add("Created By");
-
-        var rows = new ArrayList<String>();
-        rows.add(link(String.valueOf(comment.id), comment.htmlUrl));
-        rows.add(escape(DTF.format(comment.createdAt)));
-        rows.add(link(comment.user.login, comment.user.htmlUrl));
-
-        return new MetadataBuilder()
-                .summary(METADATA_TITLE)
-                .createTable(header.toArray(new String[0]))
-                .addTableRows(rows.toArray(new String[0]))
-                .build();
-    }
-
-    public String getMetadata(Issue issue) {
-        var headers = new ArrayList<String>();
-        headers.add("Number");
-        headers.add("Created On");
-        headers.add("Created By");
-
-        var hasAssignees = issue.assignees != null && !issue.assignees.isEmpty();
-        if (hasAssignees) {
-            headers.add("Assignees");
-        }
-        var hasMilestone = issue.milestone != null;
-        if (hasMilestone) {
-            headers.add("Milestone");
-            headers.add("Due By");
-        }
-
-        var rows = new ArrayList<String>();
-        rows.add(link("#" + issue.number, issue.htmlUrl));
-        rows.add(escape(DTF.format(issue.createdAt)));
-        rows.add(link(issue.user.login, issue.user.htmlUrl));
-        if (hasAssignees) {
-            rows.add(issue.assignees.stream()
-                    .map(a -> link(a.login, a.htmlUrl))
-                    .collect(Collectors.joining(", ")));
-        }
-        if (hasMilestone) {
-            rows.add(link(issue.milestone.title, issue.milestone.htmlUrl));
-            if (issue.milestone.dueOn != null) {
-                rows.add(escape(DTF.format(Instant.parse(issue.milestone.dueOn))));
-            } else {
-                rows.add("-");
+                var event = new ArrayList<String>();
+                event.add(link(bold(comment.author.username), comment.author.webUrl));
+                event.add(comment.body);
+                event.add("on " + escape(DTF.format(comment.createdAt)));
+                return String.join(" ", event);
             }
         }
-
-        return new MetadataBuilder()
-                .summary(METADATA_TITLE)
-                .createTable(headers.toArray(new String[0]))
-                .addTableRows(rows.toArray(new String[0]))
-                .build();
-    }
-
-    public String getMetadata(Timeline timeline) {
-        return Event.Type.COMMENT.value.equalsIgnoreCase(timeline.getType()) ?
-                getMetadata((Comment) timeline) : getMetadata((Event) timeline);
+        return body;
     }
 
     public String getBodyWithMetadata(Timeline timeline) {
         var metadata = getMetadata(timeline);
-        return metadata != null ? metadata + "<br/>" + "\n\n" + timeline.getBody() : timeline.getBody();
+        var body = getBody(timeline);
+        return metadata != null ? metadata + "<br/>" + "\n\n" + body : body;
     }
+
+    public abstract String getMetadata(Timeline timeline);
 
     public  List<MarkdownLink> extractUrls(String markdown) {
         var options = new MutableDataSet();

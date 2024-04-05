@@ -3,7 +3,7 @@ package network.radicle.tools.migrate.commands;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
 import network.radicle.tools.migrate.Config;
-import network.radicle.tools.migrate.clients.IGitHubClient;
+import network.radicle.tools.migrate.clients.github.IGitHubClient;
 import network.radicle.tools.migrate.core.github.*;
 import network.radicle.tools.migrate.core.radicle.actions.EmbedTest;
 import org.slf4j.Logger;
@@ -18,10 +18,10 @@ public class MockedGitHubClient implements IGitHubClient {
     private static final Logger logger = LoggerFactory.getLogger(MockedGitHubClient.class);
 
     @Override
-    public List<Issue> getIssues(int page, Config.Filters filters) {
+    public List<GitHubIssue> getIssues(int page, Config.Filters filters) {
         var issues = IssueTest.loadGitHubIssues().stream()
                 .filter(i -> {
-                    var matchesMilestone = filters.milestone() == null || (i.milestone != null && filters.milestone().equals(i.milestone.number));
+                    var matchesMilestone = filters.milestone() == null || (i.milestone != null && filters.milestone().equals(String.valueOf(i.milestone.number)));
                     var matchesState = filters.state() == Command.State.all || filters.state().name().equals(i.state);
                     var matchesAssignee = filters.assignee() == null || (i.assignee != null && filters.assignee().equals(i.assignee.login));
                     var matchesAssignees = filters.assignee() == null ||
@@ -41,26 +41,23 @@ public class MockedGitHubClient implements IGitHubClient {
                     return matchesMilestone && matchesState && (matchesAssignee || matchesAssignees) &&
                             matchesCreator && matchesLabels;
                 }).toList();
-        logger.info("Returning {} issues for page {}", issues.size(), page);
         return issues;
     }
 
     @Override
-    public List<Comment> getComments(long issueNumber, int page) {
+    public List<GitHubComment> getComments(long issueNumber, int page) {
         var comments = CommentTest.loadGitHubComments();
-        logger.info("Returning {} comments for page {}", comments.size(), page);
         return comments;
     }
 
     @Override
-    public List<Event> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
+    public List<GitHubEvent> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
         var events = EventTest.loadGitHubEvents();
-        logger.info("Returning {} events for page {}", events.size(), page);
         return events;
     }
 
     @Override
-    public Commit getCommit(String commitId) throws Exception {
+    public GitHubCommit getCommit(String commitId) throws Exception {
         return CommitTest.generateGitHubCommit();
     }
 
@@ -72,8 +69,6 @@ public class MockedGitHubClient implements IGitHubClient {
 
     @Override
     public String execSubtreeCmd(String owner, String repo, String token, String path) {
-        logger.info("executing git subtree command for owner: {}, repo: {}, token: {} into path: {}",
-                owner, repo, token, path);
         return "success";
     }
 }

@@ -11,9 +11,9 @@ public class CommitMetadata {
     @JsonProperty("url")
     public String url;
     @JsonProperty("author")
-    public User author;
+    public GitHubUser author;
     @JsonProperty("committer")
-    public User committer;
+    public GitHubUser committer;
     @JsonProperty("message")
     public String message;
 
