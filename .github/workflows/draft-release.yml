@@ -51,10 +51,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mv ./target/radicle-github-migrate-${{ env.VERSION }}-runner.jar \
-             ./target/radicle-github-migrate-${{ env.VERSION }}.jar
+          mv ./target/radicle-migration-tool-${{ env.VERSION }}-runner.jar \
+             ./target/radicle-migration-tool-${{ env.VERSION }}.jar
           
-          gh release create v${{ env.VERSION }} ./target/radicle-github-migrate-${{ env.VERSION }}.jar \
+          gh release create v${{ env.VERSION }} ./target/radicle-migration-tool-${{ env.VERSION }}.jar \
             --draft \
             --title "v${{ env.VERSION }}" \
             --generate-notes
@@ -144,9 +144,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mv ./target/radicle-github-migrate-${{ env.VERSION }}-runner${{ env.ASSET_SUFFIX }} \
-             ./target/radicle-github-migrate-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }}
+          mv ./target/radicle-migration-tool-${{ env.VERSION }}-runner${{ env.ASSET_SUFFIX }} \
+             ./target/radicle-migration-tool-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }}
           
           gh release upload v${{ env.VERSION }} \
-              ./target/radicle-github-migrate-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }} \
+              ./target/radicle-migration-tool-${{ env.VERSION }}-${{ matrix.os }}${{ env.ASSET_SUFFIX }} \
             --clobber

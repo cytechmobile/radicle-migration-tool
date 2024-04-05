@@ -1,4 +1,4 @@
-# radicle-github-migrate Changelog
+# radicle-migration-tool Changelog
 
 ## 0.5.0 - 2024-04-01
 ### Features

@@ -1,7 +1,7 @@
-radicle-github-migrate
+radicle-migration-tool
 =====================
 
-![Build](https://github.com/cytechmobile/radicle-github-migrate/workflows/build/badge.svg)
+![Build](https://github.com/cytechmobile/radicle-migration-tool/workflows/build/badge.svg)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -40,8 +40,8 @@ radicle-github-migrate
 This Command Line Interface (CLI) tool enables you to seamlessly migrate issues and wikis from your GitHub repository to your Radicle project.
 
 To utilize this tool, you have a few options:
-* You can download one of the pre-built binaries from the project's GitHub [releases](https://github.com/cytechmobile/radicle-github-migrate/releases). 
-* Alternatively, you can use the provided docker image: `docker pull ghcr.io/cytechmobile/radicle-github-migrate:latest` 
+* You can download one of the pre-built binaries from the project's GitHub [releases](https://github.com/cytechmobile/radicle-migration-tool/releases). 
+* Alternatively, you can use the provided docker image: `docker pull ghcr.io/cytechmobile/radicle-migration-tool:latest` 
 * If you prefer, you can also build a binary directly from the source code.
 
 It is recommended to have the latest version of Radicle CLI installed (`rad`) and the HTTP daemon up and running (`rad web`). Installation instructions for `rad` are available [here](https://radicle.xyz/guides/user#installation).
@@ -71,7 +71,7 @@ Additionally, the tool provides a convenient way to migrate your GitHub Wiki to 
 To migrate issues from a GitHub project, execute the issues subcommand as follows:
 
 ```bash 
-Usage: radicle-github-migrate issues [-gv=<gVersion>] [-gu=<gUrl>] -gr=<gRepo> -go=<gOwner> -gt [-gs=<gSession>] [-rv=<rVersion>] [-ru=<rUrl>] -rp=<rProject> -rh [-fs=<fSince>] [-fl=<fLabels>] [-ft=<fState>] [-fm=<fMilestone>] [-fa=<fAssignee>] [-fc=<fCreator>] [-dr]
+Usage: radicle-migration-tool issues [-gv=<gVersion>] [-gu=<gUrl>] -gr=<gRepo> -go=<gOwner> -gt [-gs=<gSession>] [-rv=<rVersion>] [-ru=<rUrl>] -rp=<rProject> -rh [-fs=<fSince>] [-fl=<fLabels>] [-ft=<fState>] [-fm=<fMilestone>] [-fa=<fAssignee>] [-fc=<fCreator>] [-dr]
 
 Migrate issues from a GitHub repository to a Radicle project.       
    
@@ -96,7 +96,7 @@ Migrate issues from a GitHub repository to a Radicle project.
 
 To migrate a wiki, execute the `wiki` subcommand as follows:
 ```bash 
-Usage: radicle-github-migrate wiki -gr=<gRepo> -go=<gOwner> -gt -rpp=<rProjectPath>
+Usage: radicle-migration-tool wiki -gr=<gRepo> -go=<gOwner> -gt -rpp=<rProjectPath>
 
 Migrate a GitHub Wiki to a Radicle project.
 
@@ -151,34 +151,34 @@ You can pass any of the command line options via environment variables. Here is 
 For example, to run the command in DEBUG mode, you can execute the following command:
 
 ```shell
-LOG_LEVEL=DEBUG java -jar radicle-github-migrate-0.1.0.jar issues
+LOG_LEVEL=DEBUG java -jar radicle-migration-tool-0.5.0.jar issues
 ```
 
 ## Binaries
 
 ### JAR Binary
-If you intend to use a specific version of the JAR binary (e.g., 0.1.0), execute the following command:
+If you intend to use a specific version of the JAR binary (e.g., 0.5.0), execute the following command:
 ```bash
-java -jar radicle-github-migrate-0.1.0.jar issues
+java -jar radicle-migration-tool-0.5.0.jar issues
 ```
 
 ### Native Binaries
 If you intend to use one of the native builds, you need to execute the corresponding native binary. For example, if you have downloaded the binary for Ubuntu, you should execute it by running the following command:
 ```bash 
-./radicle-github-migrate-0.1.0-ubuntu-latest issues
+./radicle-migration-tool-0.5.0-ubuntu-latest issues
 ```
 ### Docker Image
 If you intend to use the Docker image, please follow the instructions provided below:
 
 ```shell
 # Pull the docker image in your local docker registry
-docker pull ghcr.io/cytechmobile/radicle-github-migrate:latest
+docker pull ghcr.io/cytechmobile/radicle-migration-tool:latest
 
 # Tag the docker image in your local docker registry
-docker tag ghcr.io/cytechmobile/radicle-github-migrate:latest radicle-github-migrate
+docker tag ghcr.io/cytechmobile/radicle-migration-tool:latest radicle-migration-tool
 
 # Run the migration
-docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-github-migrate issues
+docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-migration-tool issues
 ```
 To ensure that the `docker run` command executes successfully, the following volumes are required:
 * `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs. IMPORTANT: Please ensure that the folder from which you run the tool has the appropriate write permissions.
@@ -189,20 +189,20 @@ The image assumes that your local Radicle HTTP daemon (`rad web`) is accessible 
 Lastly, you have the option to pass any environment variable using the -e option of the docker run command. For example: `docker run -e LOG_LEVEL=DEBUG`.
 
 ### Pre-built binaries
-Pre-built binaries can be downloaded from the project's GitHub [releases page](https://github.com/cytechmobile/radicle-github-migrate/releases). Choose the appropriate release for your operating system and download the associated JAR or executable file.
+Pre-built binaries can be downloaded from the project's GitHub [releases page](https://github.com/cytechmobile/radicle-migration-tool/releases). Choose the appropriate release for your operating system and download the associated JAR or executable file.
 
 
 ## Building from source
 To build the binary from source code, follow these steps:
 1.  Clone the repository from GitHub:
 ```shell
-$ git clone https://github.com/cytechmobile/radicle-github-migrate.git
+$ git clone https://github.com/cytechmobile/radicle-migration-tool.git
 ```
 
 2. Change into the project directory:
 
 ```shell
-$ cd radicle-github-migrate
+$ cd radicle-migration-tool
 ```
 
 3. Build the binaries using Maven:

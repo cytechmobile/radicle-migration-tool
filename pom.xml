@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>network.radicle.tools.github</groupId>
-  <artifactId>radicle-github-migrate</artifactId>
+  <artifactId>radicle-migration-tool</artifactId>
   <version>0.5.0</version>
   <properties>
     <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
