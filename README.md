@@ -109,7 +109,7 @@ Migrate issues from a GitHub repository to a Radicle project.
 
 To migrate a wiki, execute the `wiki` subcommand as follows:
 ```bash 
-Usage: radicle-migration-tool wiki -gr=<gRepo> -go=<gOwner> -gt -rpp=<rProjectPath>
+Usage: radicle-migration-tool github wiki -gr=<gRepo> -go=<gOwner> -gt -rpp=<rProjectPath>
 
 Migrate a GitHub Wiki to a Radicle project.
 
