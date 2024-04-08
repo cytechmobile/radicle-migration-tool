@@ -37,6 +37,11 @@ public class GitHubComment extends Timeline {
     }
 
     @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
     public String toString() {
         return "Comment{" +
                 "id=" + id +

@@ -107,6 +107,11 @@ public class GitHubEvent extends Timeline {
     }
 
     @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
     public String getType() {
         return this.event;
     }

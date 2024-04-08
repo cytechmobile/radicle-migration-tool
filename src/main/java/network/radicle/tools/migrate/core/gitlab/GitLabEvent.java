@@ -100,4 +100,9 @@ public class GitLabEvent extends Timeline {
     public String getBody() {
         return "";
     }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
 }

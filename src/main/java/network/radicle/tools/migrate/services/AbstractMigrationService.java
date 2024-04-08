@@ -22,15 +22,6 @@ public abstract class AbstractMigrationService {
         appStateService.setProperty(service, Property.LAST_RUN, String.valueOf(lastRun.toEpochMilli()));
     }
 
-    public String getRadIssueId(Service service, String sourceIssueId) {
-        var radIssueId = appStateService.getProperty(service, Property.MAP_COMMENT, sourceIssueId);
-        return Strings.emptyToNull(radIssueId);
-    }
-
-    public void setRadIssueId(Service service, String sourceIssueId, String radIssueId) {
-        appStateService.setProperty(service, Property.MAP_COMMENT, radIssueId, sourceIssueId);
-    }
-
     protected String addEmbedsInline(List<MarkdownService.MarkdownLink> links, String body) {
         for (var link : links) {
             if (!Strings.isNullOrEmpty(link.oid)) {

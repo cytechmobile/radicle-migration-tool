@@ -74,4 +74,9 @@ public class GitLabComment extends Timeline {
     public String getBody() {
         return this.body;
     }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
 }

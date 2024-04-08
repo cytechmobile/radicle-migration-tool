@@ -24,7 +24,7 @@ public class CliService {
 
     public Session createSession() {
         try {
-            var backend = config.getRadicle().url().toString().replace("/api", "");
+            var backend = config.radicle().url().toString().replace("/api", "");
             var command = "rad web -b " + backend + " --json";
 
             var authSessionPayload = execCommand(command, null);
@@ -51,7 +51,7 @@ public class CliService {
 
         try {
             var builder = new ProcessBuilder("/bin/sh", "-c", command);
-            var passphrase = config.getRadicle().passphrase();
+            var passphrase = config.radicle().passphrase();
             if (!Strings.isNullOrEmpty(passphrase)) {
                 builder.environment().put("RAD_PASSPHRASE", passphrase);
             }

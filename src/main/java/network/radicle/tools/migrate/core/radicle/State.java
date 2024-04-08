@@ -13,6 +13,9 @@ public class State {
     @JsonProperty("reason")
     public String reason;
 
+    public State() {
+    }
+
     public State(String status, String reason) {
         this.status = status;
         this.reason = reason;

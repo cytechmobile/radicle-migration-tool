@@ -22,28 +22,31 @@ public class Config {
         this.gitlab = glConfig;
     }
 
-    public GitHubConfig getGithub() {
+    public GitHubConfig github() {
         return github;
     }
 
-    public GitLabConfig getGitlab() {
+    public GitLabConfig gitlab() {
         return gitlab;
     }
 
-    public RadicleConfig getRadicle() {
+    public RadicleConfig radicle() {
         return radicle;
     }
 
-    public void setGithub(GitHubConfig github) {
-        this.github = github;
+    public Config github(GitHubConfig config) {
+        this.github = config;
+        return this;
     }
 
-    public void setGitlab(GitLabConfig gitlab) {
-        this.gitlab = gitlab;
+    public Config gitlab(GitLabConfig config) {
+        this.gitlab = config;
+        return this;
     }
 
-    public void setRadicle(RadicleConfig radicle) {
-        this.radicle = radicle;
+    public Config radicle(RadicleConfig config) {
+        this.radicle = config;
+        return this;
     }
 
     @Override

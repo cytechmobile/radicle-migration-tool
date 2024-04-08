@@ -30,7 +30,7 @@ public class AuthService {
         try {
             System.setErr(new PrintStream(new ByteArrayOutputStream()));
             var kp = SshKeyUtils.getPrivateKey(new File(radHome.orElse("~/.radicle") + "/keys/radicle"),
-                    config.getRadicle().passphrase());
+                    config.radicle().passphrase());
             var dataToSign = session.id + ":" + session.publicKey;
             var signedData = kp.getPrivateKey().sign(dataToSign.getBytes(StandardCharsets.UTF_8));
 

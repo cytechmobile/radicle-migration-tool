@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_OPENED;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_SOLVED;
+import static network.radicle.tools.migrate.services.AppStateService.Service.GITLAB;
 
 @ApplicationScoped
 public class GitLabMigrationService extends AbstractMigrationService {
@@ -39,8 +40,7 @@ public class GitLabMigrationService extends AbstractMigrationService {
     @Inject IGitLabClient gitlab;
     @Inject IRadicleClient radicle;
     @Inject Config config;
-    @Inject
-    FilesService filesService;
+    @Inject FilesService filesService;
     @Inject GitLabMarkdownService markdownService;
 
     public boolean migrateIssues() {
@@ -53,9 +53,9 @@ public class GitLabMigrationService extends AbstractMigrationService {
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
-            var filters = config.getGitlab().filters();
+            var filters = config.gitlab().filters();
             if (filters.since() == null) {
-                filters = filters.withSince(getLastRun());
+                filters = filters.withSince(getLastRun(GITLAB));
             }
             logger.info("Migration started with filters: {}", filters);
 
@@ -128,7 +128,7 @@ public class GitLabMigrationService extends AbstractMigrationService {
                     logger.info("Processed issues: {}, comments: {}, events: {}, assets: {} ...",
                             processedCount, commentsCount, eventsCount, assetsCount);
 
-                    hasMoreIssues = config.getGitlab().pageSize() == issues.size();
+                    hasMoreIssues = config.gitlab().pageSize() == issues.size();
                     page++;
                 } catch (InternalServerErrorException | BadRequestException ex) {
                     var ids = issues.stream().map(i -> i.iid).toList();
@@ -138,8 +138,8 @@ public class GitLabMigrationService extends AbstractMigrationService {
                 }
             }
 
-            if (!config.getRadicle().dryRun()) {
-                setLastRun(Instant.now());
+            if (!config.radicle().dryRun()) {
+                setLastRun(GITLAB, Instant.now());
             }
 
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
@@ -161,7 +161,7 @@ public class GitLabMigrationService extends AbstractMigrationService {
         while (hasMore) {
             var comments = gitlab.getComments(issue.iid, page);
             commentsList.addAll(comments);
-            hasMore = config.getGitlab().pageSize() == comments.size();
+            hasMore = config.gitlab().pageSize() == comments.size();
             page++;
         }
         return commentsList;
@@ -174,16 +174,10 @@ public class GitLabMigrationService extends AbstractMigrationService {
         while (hasMore) {
             var events = gitlab.getEvents(issue.iid, page, type);
             eventsList.addAll(events.stream().filter(e -> GitLabEvent.Type.isValid(e.getType())).toList());
-            hasMore = config.getGitlab().pageSize() == events.size();
+            hasMore = config.gitlab().pageSize() == events.size();
             page++;
         }
         return eventsList;
-    }
-
-    public String getLastRunPropertyName() {
-        var radProject = config.getRadicle().project().replace("rad:", "");
-        return "gitlab." + config.getGitlab().namespace() + "." + config.getGitlab().project() + ".radicle." + radProject +
-                ".lastRunInMillis";
     }
 
     private List<Embed> fetchEmbeds(List<MarkdownLink> links) {
@@ -199,15 +193,6 @@ public class GitLabMigrationService extends AbstractMigrationService {
             }
         }
         return embeds;
-    }
-
-    private String addEmbedsInline(List<MarkdownLink> links, String body) {
-        for (var link : links) {
-            if (!Strings.isNullOrEmpty(link.oid)) {
-                body = body.replace(link.url, link.oid);
-            }
-        }
-        return body;
     }
 
     public network.radicle.tools.migrate.core.radicle.Issue toRadicle(GitLabIssue issue) {

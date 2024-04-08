@@ -13,14 +13,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class AppStateService {
     private static final Logger logger = LoggerFactory.getLogger(AppStateService.class);
 
     public enum Property {
-        LAST_RUN, MAP_ISSUE, MAP_COMMENT
+        LAST_RUN("%s.%s.%s.radicle.%s.lastRunInMillis");
+
+        public final String value;
+
+        Property(String value) {
+            this.value = value;
+        }
     }
 
     public enum Service {
@@ -82,34 +90,27 @@ public class AppStateService {
         setProperty(getPropertyName(service, property, args), value);
     }
 
-    private String getPropertyName(Service service, Property type, String... args) {
-        var property = service.name().toLowerCase() + ".";
+    private String getPropertyName(Service service, Property prop, String... args) {
+        var owner = "";
+        var repo = "";
 
         switch (service) {
             case GITHUB -> {
-                property += config.getGithub().owner() + "." + config.getGithub().repo();
+                owner = config.github().owner();
+                repo = config.github().repo();
             }
             case GITLAB -> {
-                property += config.getGitlab().namespace() + "." + config.getGitlab().project();
+                owner = config.gitlab().namespace();
+                repo = config.gitlab().project();
             }
+            default -> throw new IllegalStateException("Unexpected value: " + service);
         }
 
-        var radProject = config.getRadicle().project().replace("rad:", "");
-        property += ".radicle." + radProject;
+        var radProject = config.radicle().project().replace("rad:", "");
 
-        switch (type) {
-            case LAST_RUN -> {
-                property += ".lastRunInMillis";
-            }
-            case MAP_ISSUE -> {
-                property += ".issue";
-            }
-            case MAP_COMMENT -> {
-                property += ".comment";
-            }
-        }
+        var params = Stream.concat(Arrays.stream(new String[]{service.name().toLowerCase(), owner, repo, radProject}),
+                        Arrays.stream(args)).toArray();
 
-        var suffix = args != null ? String.join(".", args) : "";
-        return String.join(".", property, suffix);
+        return String.format(prop.value, params);
     }
 }

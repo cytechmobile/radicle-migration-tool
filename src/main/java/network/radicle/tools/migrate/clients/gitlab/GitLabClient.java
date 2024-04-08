@@ -38,16 +38,16 @@ public class GitLabClient implements IGitLabClient {
     @Inject FilesService filesService;
 
     public List<GitLabIssue> getIssues(int page, Config.Filters filters) throws Exception {
-        var id = URLEncoder.encode(config.getGitlab().namespace() + "/" + config.getGitlab().project(),
+        var id = URLEncoder.encode(config.gitlab().namespace() + "/" + config.gitlab().project(),
                 StandardCharsets.UTF_8);
 
-        var url = config.getGitlab().url() + "/" + config.getGitlab().version() + "/projects/" + id + "/issues";
+        var url = config.gitlab().url() + "/" + config.gitlab().version() + "/projects/" + id + "/issues";
 
         var milestone = filters.milestone() != null ? filters.milestone() : null;
         var state = filters.state() != null ? filters.state().name() : State.all.name();
         state = state.equals(State.open.name()) ? "opened" : state;
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGitlab().pageSize())
+                .queryParam("per_page", config.gitlab().pageSize())
                 .queryParam("page", page)
                 .queryParam("milestone", milestone)
                 .queryParam("state", state)
@@ -57,7 +57,7 @@ public class GitLabClient implements IGitLabClient {
                 .queryParam("created_after", filters.since().toString())
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGitlab().token()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.gitlab().token()))
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -68,19 +68,19 @@ public class GitLabClient implements IGitLabClient {
 
     @Override
     public List<GitLabComment> getComments(long issueNumber, int page) throws Exception {
-        var id = URLEncoder.encode(config.getGitlab().namespace() + "/" + config.getGitlab().project(),
+        var id = URLEncoder.encode(config.gitlab().namespace() + "/" + config.gitlab().project(),
                 StandardCharsets.UTF_8);
 
-        var url = config.getGitlab().url() + "/" + config.getGitlab().version() + "/projects/" + id +
+        var url = config.gitlab().url() + "/" + config.gitlab().version() + "/projects/" + id +
                 "/issues/" + issueNumber + "/notes";
 
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGitlab().pageSize())
+                .queryParam("per_page", config.gitlab().pageSize())
                 .queryParam("page", page)
                 .queryParam("sort", "asc")
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGitlab().token()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.gitlab().token()))
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -91,22 +91,22 @@ public class GitLabClient implements IGitLabClient {
 
     @Override
     public List<GitLabEvent> getEvents(long issueNumber, int page, GitLabEvent.Type type) throws Exception {
-        var id = URLEncoder.encode(config.getGitlab().namespace() + "/" + config.getGitlab().project(),
+        var id = URLEncoder.encode(config.gitlab().namespace() + "/" + config.gitlab().project(),
                 StandardCharsets.UTF_8);
 
         var endpoint = type == STATE ? "resource_state_events" :
                 type == LABEL ? "resource_label_events" :
                         type == MILESTONE ? "resource_milestone_events" : "";
 
-        var url = config.getGitlab().url() + "/" + config.getGitlab().version() + "/projects/" + id +
+        var url = config.gitlab().url() + "/" + config.gitlab().version() + "/projects/" + id +
                 "/issues/" + issueNumber + "/" + endpoint;
 
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGitlab().pageSize())
+                .queryParam("per_page", config.gitlab().pageSize())
                 .queryParam("page", page)
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGitlab().token()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.gitlab().token()))
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -123,8 +123,8 @@ public class GitLabClient implements IGitLabClient {
                 return null;
             }
 
-            var cookieHeader = "_gitlab_session=" + config.getGitlab().session() + "; Domain= " +
-                    config.getGitlab().domain() + "; Secure; HttpOnly";
+            var cookieHeader = "_gitlab_session=" + config.gitlab().session() + "; Domain= " +
+                    config.gitlab().domain() + "; Secure; HttpOnly";
             try (var response = client.target(urlPrefix + url)
                     .request()
                     .header("Cookie", cookieHeader)
@@ -155,7 +155,7 @@ public class GitLabClient implements IGitLabClient {
 
     public String getRepoUrl(String token) {
         var tokenPrefix = Strings.isNullOrEmpty(token) ? "" : token + "@";
-        return "https://" + tokenPrefix + config.getGitlab().domain() + "/" + config.getGitlab().namespace() + "/" +
-                config.getGitlab().project();
+        return "https://" + tokenPrefix + config.gitlab().domain() + "/" + config.gitlab().namespace() + "/" +
+                config.gitlab().project();
     }
 }

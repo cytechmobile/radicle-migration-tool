@@ -18,7 +18,7 @@ class AuthServiceTest {
     void testSessionSign() {
         var authService = new AuthService();
         authService.config = new Config();
-        authService.config.setRadicle(new RadicleConfig(null, null, null, "test", null, false));
+        authService.config.radicle(new RadicleConfig(null, null, null, "test", null, false));
         authService.radHome =  Optional.of("src/test/resources/radicle");
         var session = new Session();
         session.publicKey = PUBLIC_KEY;

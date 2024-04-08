@@ -14,7 +14,7 @@ public class Issue {
     @JsonProperty("author")
     public Author author;
     @JsonProperty("assignees")
-    public List<String> assignees;
+    public List<Author> assignees;
     @JsonProperty("title")
     public String title;
     @JsonProperty("description")
@@ -27,6 +27,10 @@ public class Issue {
     public List<String> labels;
     @JsonProperty("embeds")
     public List<Embed> embeds;
+
+    public String getId() {
+        return id;
+    }
 
     @Override
     public String toString() {

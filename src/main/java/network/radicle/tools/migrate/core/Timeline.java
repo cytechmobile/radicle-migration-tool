@@ -9,4 +9,6 @@ public abstract class Timeline {
     public abstract Instant getCreatedAt();
 
     public abstract String getBody();
+
+    public abstract Long getId();
 }

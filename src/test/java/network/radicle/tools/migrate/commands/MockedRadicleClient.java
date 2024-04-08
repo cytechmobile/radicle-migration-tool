@@ -3,11 +3,13 @@ package network.radicle.tools.migrate.commands;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
 import network.radicle.tools.migrate.clients.radicle.IRadicleClient;
+import network.radicle.tools.migrate.core.radicle.Issue;
 import network.radicle.tools.migrate.core.radicle.Session;
 import network.radicle.tools.migrate.core.radicle.actions.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Alternative
@@ -20,6 +22,11 @@ public class MockedRadicleClient implements IRadicleClient {
         var session = new Session();
         session.id = UUID.randomUUID().toString();
         return session;
+    }
+
+    @Override
+    public List<Issue> getIssues(Session session, String state) throws Exception {
+        return List.of();
     }
 
     @Override

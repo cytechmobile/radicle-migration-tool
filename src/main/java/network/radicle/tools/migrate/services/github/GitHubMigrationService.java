@@ -8,12 +8,18 @@ import jakarta.ws.rs.InternalServerErrorException;
 import network.radicle.tools.migrate.Config;
 import network.radicle.tools.migrate.clients.github.IGitHubClient;
 import network.radicle.tools.migrate.clients.radicle.IRadicleClient;
+import network.radicle.tools.migrate.commands.Command;
 import network.radicle.tools.migrate.core.Timeline;
 import network.radicle.tools.migrate.core.github.GitHubComment;
 import network.radicle.tools.migrate.core.github.GitHubEvent;
 import network.radicle.tools.migrate.core.github.GitHubIssue;
 import network.radicle.tools.migrate.core.radicle.Embed;
+import network.radicle.tools.migrate.core.radicle.Issue;
+import network.radicle.tools.migrate.core.radicle.Session;
 import network.radicle.tools.migrate.core.radicle.actions.CommentAction;
+import network.radicle.tools.migrate.core.radicle.actions.CommentEditAction;
+import network.radicle.tools.migrate.core.radicle.actions.EditAction;
+import network.radicle.tools.migrate.core.radicle.actions.LabelAction;
 import network.radicle.tools.migrate.core.radicle.actions.LifecycleAction;
 import network.radicle.tools.migrate.services.AbstractMigrationService;
 import network.radicle.tools.migrate.services.FilesService;
@@ -23,9 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +43,7 @@ import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_COMPLE
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_OPEN;
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_OTHER;
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_SOLVED;
+import static network.radicle.tools.migrate.services.AppStateService.Service.GITHUB;
 
 @ApplicationScoped
 public class GitHubMigrationService extends AbstractMigrationService {
@@ -41,8 +52,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
     @Inject IGitHubClient github;
     @Inject IRadicleClient radicle;
     @Inject Config config;
-    @Inject
-    FilesService filesService;
+    @Inject FilesService filesService;
     @Inject GitHubMarkdownService markdownService;
 
     public boolean migrateIssues() {
@@ -55,9 +65,9 @@ public class GitHubMigrationService extends AbstractMigrationService {
 
         var partiallyOrNonMigratedIssues = new HashSet<Long>();
         try {
-            var filters = config.getGithub().filters();
+            var filters = config.github().filters();
             if (filters.since() == null) {
-                filters = filters.withSince(getLastRun());
+                filters = filters.withSince(getLastRun(GITHUB));
             }
             logger.info("Migration started with filters: {}", filters);
 
@@ -69,6 +79,13 @@ public class GitHubMigrationService extends AbstractMigrationService {
             }
 
             logger.debug("Radicle session created: {}", session.id);
+
+            var openIssues = radicle.getIssues(session, Command.State.open.name());
+            var closedIssues = radicle.getIssues(session, Command.State.closed.name());
+            var issuesCache = Stream.of(openIssues, closedIssues)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toMap(Issue::getId, Function.identity(), (first, second) -> first));
+            var issuesMapper = calculateIssuesMapping(issuesCache.values().stream().toList());
 
             while (hasMoreIssues) {
                 List<GitHubIssue> issues = List.of();
@@ -83,15 +100,26 @@ public class GitHubMigrationService extends AbstractMigrationService {
 
                         var radIssue = toRadicle(issue);
                         try {
-                            //process inline embeds
+                            //process inline embeds for issue description
                             var links = markdownService.extractUrls(issue.body);
                             radIssue.embeds = fetchEmbeds(links);
                             radIssue.description = addEmbedsInline(links, radIssue.description);
 
-                            var id = radicle.createIssue(session, radIssue);
-                            // update issue's state
-                            if (!STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
+                            //check if the issue is already synced in the past and update it
+                            var id = issuesMapper.get("issue." + issue.number);
+                            var cachedIssue = !Strings.isNullOrEmpty(id) ? issuesCache.get(id) : null;
+                            if (Strings.isNullOrEmpty(id)) {
+                                id = radicle.createIssue(session, radIssue);
+                                if (!STATE_OPEN.equalsIgnoreCase(radIssue.state.status)) {
+                                    radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
+                                }
+                            } else {
+                                radicle.updateIssue(session, id, new EditAction(radIssue.title));
                                 radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
+                                radicle.updateIssue(session, id, new LabelAction(radIssue.labels));
+                                //issue description is stored as a comment with the same as the issue id
+                                //check the description has been changed to avoid unnecessary comment edits
+                                updateComment(session, id, id, radIssue.description, radIssue.embeds, cachedIssue);
                             }
 
                             var comments = getCommentsFor(issue);
@@ -110,6 +138,8 @@ public class GitHubMigrationService extends AbstractMigrationService {
                                 List<MarkdownLink> eventLinks = List.of();
                                 List<Embed> eventEmbeds = List.of();
 
+                                var isComment = GitHubEvent.Type.COMMENT.value.equalsIgnoreCase(event.getType());
+
                                 //fetch any extra information for specific event types
                                 if (GitHubEvent.Type.REFERENCED.value.equalsIgnoreCase(event.getType()) ||
                                         GitHubEvent.Type.CLOSED.value.equalsIgnoreCase(event.getType())) {
@@ -117,15 +147,28 @@ public class GitHubMigrationService extends AbstractMigrationService {
                                     if (e.commitUrl != null) {
                                         e.commit = github.getCommit(e.commitId);
                                     }
-                                } else if (GitHubEvent.Type.COMMENT.value.equalsIgnoreCase(event.getType())) {
+                                } else if (isComment) {
                                     //process inline embeds
                                     eventLinks = markdownService.extractUrls(event.getBody());
                                     eventEmbeds = fetchEmbeds(eventLinks);
                                 }
                                 var bodyWithMetadata = markdownService.getBodyWithMetadata(event);
                                 var bodyWithEmbeds = addEmbedsInline(eventLinks, bodyWithMetadata);
-                                radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
 
+                                if (isComment) {
+                                    var commentId = issuesMapper.get("comment." + event.getId());
+                                    if (Strings.isNullOrEmpty(commentId)) {
+                                        radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+                                    } else {
+                                        updateComment(session, id, commentId, bodyWithEmbeds, eventEmbeds, cachedIssue);
+                                    }
+                                } else {
+                                    var lastEventTimestamp = getLastEventTimestamp(cachedIssue);
+                                    var eventTimestamp = event.getCreatedAt();
+                                    if (lastEventTimestamp == null || lastEventTimestamp.isBefore(eventTimestamp)) {
+                                        radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+                                    }
+                                }
                                 assetsCount += eventEmbeds.size();
                             }
                         } catch (Exception ex) {
@@ -136,7 +179,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
                     logger.info("Processed issues: {}, comments: {}, events: {}, assets: {} ...",
                             processedCount, commentsCount, eventsCount, assetsCount);
 
-                    hasMoreIssues = config.getGithub().pageSize() == issues.size();
+                    hasMoreIssues = config.github().pageSize() == issues.size();
                     page++;
                 } catch (InternalServerErrorException | BadRequestException ex) {
                     var ids = issues.stream().map(i -> i.number).toList();
@@ -146,10 +189,9 @@ public class GitHubMigrationService extends AbstractMigrationService {
                 }
             }
 
-            if (!config.getRadicle().dryRun()) {
-                setLastRun(Instant.now());
+            if (!config.radicle().dryRun()) {
+                setLastRun(GITHUB, Instant.now());
             }
-
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }
@@ -163,10 +205,10 @@ public class GitHubMigrationService extends AbstractMigrationService {
     }
 
     public boolean migrateWiki() {
-        var owner = config.getGithub().owner();
-        var repo = config.getGithub().repo();
-        var token = config.getGithub().token();
-        var path = config.getRadicle().path();
+        var owner = config.github().owner();
+        var repo = config.github().repo();
+        var token = config.github().token();
+        var path = config.radicle().path();
 
         var resp = github.execSubtreeCmd(owner, repo, token, path);
 
@@ -180,7 +222,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
         while (hasMore) {
             var comments = github.getComments(issue.number, page);
             commentsList.addAll(comments);
-            hasMore = config.getGithub().pageSize() == comments.size();
+            hasMore = config.github().pageSize() == comments.size();
             page++;
         }
         return commentsList;
@@ -193,16 +235,10 @@ public class GitHubMigrationService extends AbstractMigrationService {
         while (hasMore) {
             var events = github.getEvents(issue.number, page, timeline);
             eventsList.addAll(events.stream().filter(e -> GitHubEvent.Type.isValid(e.event)).toList());
-            hasMore = config.getGithub().pageSize() == events.size();
+            hasMore = config.github().pageSize() == events.size();
             page++;
         }
         return eventsList;
-    }
-
-    public String getLastRunPropertyName() {
-        var radProject = config.getRadicle().project().replace("rad:", "");
-        return "github." + config.getGithub().owner() + "." + config.getGithub().repo() + ".radicle." + radProject +
-                ".lastRunInMillis";
     }
 
     private List<Embed> fetchEmbeds(List<MarkdownLink> links) {
@@ -220,13 +256,57 @@ public class GitHubMigrationService extends AbstractMigrationService {
         return embeds;
     }
 
-    private String addEmbedsInline(List<MarkdownLink> links, String body) {
-        for (var link : links) {
-            if (!Strings.isNullOrEmpty(link.oid)) {
-                body = body.replace(link.url, link.oid);
+    private Map<String, String> calculateIssuesMapping(List<Issue> issues) {
+        var mapping = new HashMap<String, String>();
+        for (var issue : issues) {
+            var discussion = issue.discussion;
+            for (var idx = 0; idx < discussion.size(); idx++) {
+                var disc = discussion.get(idx);
+                var links = markdownService.extractUrls(disc.body);
+                if (!links.isEmpty()) {
+                    var separator = idx == 0 ? "/" : "-";
+                    var prefix = idx == 0 ? "issue" : "comment";
+                    var path = idx == 0 ? "/issues" : "#issuecomment";
+                    for (var link : links) {
+                        if (link.url.contains(path)) {
+                            var segments = link.url.split(separator);
+                            var id = segments[segments.length - 1];
+                            mapping.putIfAbsent(prefix + "." + id, disc.id);
+                            break;
+                        }
+                    }
+                }
             }
         }
-        return body;
+        return mapping;
+    }
+
+    private static Instant getLastEventTimestamp(Issue cachedIssue) {
+        Instant lastEventTimestamp = null;
+        if (cachedIssue != null) {
+            var discussion = cachedIssue.discussion;
+            var lastEvent = discussion.get(discussion.size() - 1);
+            lastEventTimestamp = lastEvent != null ?
+                    Instant.ofEpochSecond(Long.parseLong(lastEvent.timestamp)) : null;
+        }
+        return lastEventTimestamp;
+    }
+
+    private void updateComment(Session session, String id, String commentId, String body,
+                               List<Embed> embeds, Issue cached) throws Exception {
+        if (cached != null) {
+            //check the description has been changed to avoid unnecessary comment edits
+            for (var comment : cached.discussion) {
+                if (commentId.equals(comment.id)) {
+                    if (!comment.body.equalsIgnoreCase(body)) {
+                        logger.debug("Updating comment {}", commentId);
+                        radicle.updateIssue(session, id, new CommentEditAction(
+                                commentId, body, embeds));
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public network.radicle.tools.migrate.core.radicle.Issue toRadicle(GitHubIssue issue) {

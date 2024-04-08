@@ -16,10 +16,7 @@ public class Command implements Runnable, ICommand {
 
     public void run() {
         var c = getConfiguration();
-        config.setGithub(c.getGithub());
-        config.setGitlab(c.getGitlab());
-        config.setRadicle(c.getRadicle());
-
+        config.github(c.github()).gitlab(c.gitlab()).radicle(c.radicle());
         exec();
     }
 

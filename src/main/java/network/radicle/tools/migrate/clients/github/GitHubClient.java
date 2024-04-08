@@ -38,13 +38,13 @@ public class GitHubClient implements IGitHubClient {
     @Inject CliService cli;
 
     public List<GitHubIssue> getIssues(int page, Config.Filters filters) throws Exception {
-        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+        var url = config.github().url() + "/repos/" + config.github().owner() + "/" + config.github().repo() +
                 "/issues";
 
         var milestone = filters.milestone() != null ? filters.milestone() : null;
         var state = filters.state() != null ? filters.state().name() : State.all.name();
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("per_page", config.github().pageSize())
                 .queryParam("page", page)
                 .queryParam("milestone", milestone)
                 .queryParam("state", state)
@@ -54,8 +54,8 @@ public class GitHubClient implements IGitHubClient {
                 .queryParam("since", filters.since().toString())
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
-                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.github().token()))
+                .header("X-GitHub-Api-Version", config.github().version())
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -66,16 +66,16 @@ public class GitHubClient implements IGitHubClient {
 
     @Override
     public List<GitHubComment> getComments(long issueNumber, int page) throws Exception {
-        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+        var url = config.github().url() + "/repos/" + config.github().owner() + "/" + config.github().repo() +
                 "/issues/" + issueNumber + "/comments";
 
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("per_page", config.github().pageSize())
                 .queryParam("page", page)
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
-                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.github().token()))
+                .header("X-GitHub-Api-Version", config.github().version())
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -86,18 +86,18 @@ public class GitHubClient implements IGitHubClient {
 
     @Override
     public List<GitHubEvent> getEvents(long issueNumber, int page, boolean timeline) throws Exception {
-        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+        var url = config.github().url() + "/repos/" + config.github().owner() + "/" + config.github().repo() +
                 "/issues/" + issueNumber;
 
         url += timeline ? "/timeline" : "/events";
 
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("per_page", config.github().pageSize())
                 .queryParam("page", page)
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
-                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.github().token()))
+                .header("X-GitHub-Api-Version", config.github().version())
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -108,16 +108,16 @@ public class GitHubClient implements IGitHubClient {
 
     @Override
     public GitHubCommit getCommit(String commitId) throws Exception {
-        var url = config.getGithub().url() + "/repos/" + config.getGithub().owner() + "/" + config.getGithub().repo() +
+        var url = config.github().url() + "/repos/" + config.github().owner() + "/" + config.github().repo() +
                 "/commits/" + commitId;
 
         try (var resp = client.target(url)
-                .queryParam("per_page", config.getGithub().pageSize())
+                .queryParam("per_page", config.github().pageSize())
                 .queryParam("page", 1)
                 .request()
                 .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.getGithub().token()))
-                .header("X-GitHub-Api-Version", config.getGithub().version())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + Strings.nullToEmpty(config.github().token()))
+                .header("X-GitHub-Api-Version", config.github().version())
                 .get()) {
 
             var json = ResponseHandler.handleResponse(resp);
@@ -134,7 +134,7 @@ public class GitHubClient implements IGitHubClient {
                 return null;
             }
 
-            var cookieHeader = "user_session=" + config.getGithub().session() + "; Domain=" + config.getGithub().domain() + "; Secure; HttpOnly";
+            var cookieHeader = "user_session=" + config.github().session() + "; Domain=" + config.github().domain() + "; Secure; HttpOnly";
             try (var response = client.target(url)
                     .request()
                     .header("Cookie", cookieHeader)
@@ -182,8 +182,8 @@ public class GitHubClient implements IGitHubClient {
 
     public String getRepoUrl(String token) {
         var tokenPrefix = Strings.isNullOrEmpty(token) ? "" : token + "@";
-        return "https://" + tokenPrefix + config.getGithub().domain() + "/" + config.getGithub().owner() + "/" +
-                config.getGithub().repo();
+        return "https://" + tokenPrefix + config.github().domain() + "/" + config.github().owner() + "/" +
+                config.github().repo();
     }
 
     public String getCommand(String path, String token) {
