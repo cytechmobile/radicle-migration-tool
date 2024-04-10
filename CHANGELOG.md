@@ -1,5 +1,10 @@
 # radicle-migration-tool Changelog
 
+## 0.6.0 - 2024-04-10
+### Features
+* Added support for ongoing GitHub issues synchronization (including the title, labels, description, comments and events).
+* Added support for ongoing GitLab issues synchronization (including the title, labels, description, comments and events).
+
 ## 0.5.0 - 2024-04-05
 ### Features
 * Added support for migrating GitHub Wikis. The tool provides a convenient way to migrate your GitHub Wiki to your Radicle project under the `.wiki` directory, offering a quick solution until Radicle potentially introduces support for Wikis.
