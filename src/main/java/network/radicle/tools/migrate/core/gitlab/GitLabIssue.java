@@ -14,6 +14,7 @@ import java.util.List;
 public class GitLabIssue {
 
     public static final String METADATA_TITLE = "GitLab Metadata";
+    public static final String STATE_OPEN = "open";
     public static final String STATE_OPENED = "opened";
     public static final String STATE_CLOSED = "closed";
     public static final String STATE_SOLVED = "solved";

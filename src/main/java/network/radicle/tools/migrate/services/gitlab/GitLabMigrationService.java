@@ -14,7 +14,11 @@ import network.radicle.tools.migrate.core.gitlab.GitLabEvent;
 import network.radicle.tools.migrate.core.gitlab.GitLabEvent.Type;
 import network.radicle.tools.migrate.core.gitlab.GitLabIssue;
 import network.radicle.tools.migrate.core.radicle.Embed;
+import network.radicle.tools.migrate.core.radicle.Issue;
+import network.radicle.tools.migrate.core.radicle.State;
 import network.radicle.tools.migrate.core.radicle.actions.CommentAction;
+import network.radicle.tools.migrate.core.radicle.actions.EditAction;
+import network.radicle.tools.migrate.core.radicle.actions.LabelAction;
 import network.radicle.tools.migrate.core.radicle.actions.LifecycleAction;
 import network.radicle.tools.migrate.services.AbstractMigrationService;
 import network.radicle.tools.migrate.services.FilesService;
@@ -25,10 +29,13 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_OPEN;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_OPENED;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_SOLVED;
 import static network.radicle.tools.migrate.services.AppStateService.Service.GITLAB;
@@ -68,6 +75,9 @@ public class GitLabMigrationService extends AbstractMigrationService {
 
             logger.debug("Radicle session created: {}", session.id);
 
+            var issuesCache = loadIssuesCache(session);
+            var issuesMapper = calculateIssuesMapping(issuesCache);
+
             while (hasMoreIssues) {
                 List<GitLabIssue> issues = List.of();
                 try {
@@ -82,10 +92,23 @@ public class GitLabMigrationService extends AbstractMigrationService {
                             radIssue.embeds = fetchEmbeds(links);
                             radIssue.description = addEmbedsInline(links, radIssue.description);
 
-                            var id = radicle.createIssue(session, radIssue);
-                            // update issue's state
-                            if (!STATE_OPENED.equalsIgnoreCase(radIssue.state.status)) {
-                                radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
+                            //check if the issue is already synced in the past and update it
+                            var id = issuesMapper.get("issue." + issue.iid);
+                            var cachedIssue = !Strings.isNullOrEmpty(id) ? issuesCache.get(id) : null;
+                            if (Strings.isNullOrEmpty(id)) {
+                                id = radicle.createIssue(session, radIssue);
+                                if (!STATE_OPENED.equalsIgnoreCase(radIssue.state.status)) {
+                                    radicle.updateIssue(session, id, new LifecycleAction(radIssue.state));
+                                }
+                            } else {
+                                radicle.updateIssue(session, id, new EditAction(radIssue.title));
+                                var state = STATE_OPENED.equalsIgnoreCase(radIssue.state.status) ?
+                                        new State(STATE_OPEN, "") : radIssue.state;
+                                radicle.updateIssue(session, id, new LifecycleAction(state));
+                                radicle.updateIssue(session, id, new LabelAction(radIssue.labels));
+                                //issue description is stored as a comment with the same as the issue id
+                                //check the description has been changed to avoid unnecessary comment edits
+                                updateComment(session, id, id, radIssue.description, radIssue.embeds, cachedIssue);
                             }
 
                             var comments = getCommentsFor(issue);
@@ -108,15 +131,31 @@ public class GitLabMigrationService extends AbstractMigrationService {
                                 List<MarkdownLink> eventLinks = List.of();
                                 List<Embed> eventEmbeds = List.of();
 
+                                var isComment = Type.COMMENT.value.equalsIgnoreCase(event.getType());
+
                                 //fetch any extra information for specific event types
-                                if (Type.COMMENT.value.equalsIgnoreCase(event.getType())) {
+                                if (isComment) {
                                     //process inline embeds
                                     eventLinks = markdownService.extractUrls(event.getBody());
                                     eventEmbeds = fetchEmbeds(eventLinks);
                                 }
                                 var bodyWithMetadata = markdownService.getBodyWithMetadata(event);
                                 var bodyWithEmbeds = addEmbedsInline(eventLinks, bodyWithMetadata);
-                                radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+
+                                if (isComment) {
+                                    var commentId = issuesMapper.get("comment." + event.getId());
+                                    if (Strings.isNullOrEmpty(commentId)) {
+                                        radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+                                    } else {
+                                        updateComment(session, id, commentId, bodyWithEmbeds, eventEmbeds, cachedIssue);
+                                    }
+                                } else {
+                                    var lastEventTimestamp = getLastEventTimestamp(cachedIssue);
+                                    var eventTimestamp = event.getCreatedAt();
+                                    if (lastEventTimestamp == null || lastEventTimestamp.isBefore(eventTimestamp)) {
+                                        radicle.updateIssue(session, id, new CommentAction(bodyWithEmbeds, eventEmbeds, id));
+                                    }
+                                }
 
                                 assetsCount += eventEmbeds.size();
                             }
@@ -195,6 +234,32 @@ public class GitLabMigrationService extends AbstractMigrationService {
         return embeds;
     }
 
+    private Map<String, String> calculateIssuesMapping(Map<String, Issue> issuesCache) {
+        var mapping = new HashMap<String, String>();
+        var issues = issuesCache.values().stream().sorted(Comparator.comparing(Issue::getCreatedAt)).toList();
+        for (var issue : issues) {
+            var discussion = issue.discussion;
+            for (var idx = 0; idx < discussion.size(); idx++) {
+                var disc = discussion.get(idx);
+                var links = markdownService.extractUrls(disc.body);
+                if (!links.isEmpty()) {
+                    var separator = idx == 0 ? "/" : "_";
+                    var prefix = idx == 0 ? "issue" : "comment";
+                    var path = idx == 0 ? "/issues" : "#note";
+                    for (var link : links) {
+                        if (link.url.contains(path)) {
+                            var segments = link.url.split(separator);
+                            var id = segments[segments.length - 1];
+                            mapping.put(prefix + "." + id, disc.id);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return mapping;
+    }
+
     public network.radicle.tools.migrate.core.radicle.Issue toRadicle(GitLabIssue issue) {
         var radIssue = new network.radicle.tools.migrate.core.radicle.Issue();
 
@@ -207,7 +272,9 @@ public class GitLabMigrationService extends AbstractMigrationService {
 
         if (issue.milestone != null) {
             var rLabels = new ArrayList<>(radIssue.labels);
-            rLabels.add(issue.type.toLowerCase());
+            if (!"issue".equalsIgnoreCase(issue.type)) {
+                rLabels.add(issue.type.toLowerCase());
+            }
             rLabels.add(issue.milestone.title);
             radIssue.labels = rLabels;
         }

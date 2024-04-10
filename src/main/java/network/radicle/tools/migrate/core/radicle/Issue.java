@@ -32,6 +32,10 @@ public class Issue {
         return id;
     }
 
+    public long getCreatedAt() {
+        return discussion != null && !discussion.isEmpty() ? Long.parseLong(discussion.get(0).timestamp) : 0;
+    }
+
     @Override
     public String toString() {
         return "Issue{" +

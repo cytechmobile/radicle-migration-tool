@@ -5,19 +5,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
-import network.radicle.tools.migrate.Config;
 import network.radicle.tools.migrate.clients.github.IGitHubClient;
-import network.radicle.tools.migrate.clients.radicle.IRadicleClient;
-import network.radicle.tools.migrate.commands.Command;
 import network.radicle.tools.migrate.core.Timeline;
 import network.radicle.tools.migrate.core.github.GitHubComment;
 import network.radicle.tools.migrate.core.github.GitHubEvent;
 import network.radicle.tools.migrate.core.github.GitHubIssue;
 import network.radicle.tools.migrate.core.radicle.Embed;
 import network.radicle.tools.migrate.core.radicle.Issue;
-import network.radicle.tools.migrate.core.radicle.Session;
 import network.radicle.tools.migrate.core.radicle.actions.CommentAction;
-import network.radicle.tools.migrate.core.radicle.actions.CommentEditAction;
 import network.radicle.tools.migrate.core.radicle.actions.EditAction;
 import network.radicle.tools.migrate.core.radicle.actions.LabelAction;
 import network.radicle.tools.migrate.core.radicle.actions.LifecycleAction;
@@ -29,13 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,10 +43,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
     private static final Logger logger = LoggerFactory.getLogger(GitHubMigrationService.class);
 
     @Inject IGitHubClient github;
-    @Inject IRadicleClient radicle;
-    @Inject Config config;
     @Inject FilesService filesService;
-    @Inject GitHubMarkdownService markdownService;
 
     public boolean migrateIssues() {
         var page = 1;
@@ -80,12 +70,8 @@ public class GitHubMigrationService extends AbstractMigrationService {
 
             logger.debug("Radicle session created: {}", session.id);
 
-            var openIssues = radicle.getIssues(session, Command.State.open.name());
-            var closedIssues = radicle.getIssues(session, Command.State.closed.name());
-            var issuesCache = Stream.of(openIssues, closedIssues)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toMap(Issue::getId, Function.identity(), (first, second) -> first));
-            var issuesMapper = calculateIssuesMapping(issuesCache.values().stream().toList());
+            var issuesCache = loadIssuesCache(session);
+            var issuesMapper = calculateIssuesMapping(issuesCache);
 
             while (hasMoreIssues) {
                 List<GitHubIssue> issues = List.of();
@@ -256,8 +242,9 @@ public class GitHubMigrationService extends AbstractMigrationService {
         return embeds;
     }
 
-    private Map<String, String> calculateIssuesMapping(List<Issue> issues) {
+    private Map<String, String> calculateIssuesMapping(Map<String, Issue> issuesCache) {
         var mapping = new HashMap<String, String>();
+        var issues = issuesCache.values().stream().sorted(Comparator.comparing(Issue::getCreatedAt)).toList();
         for (var issue : issues) {
             var discussion = issue.discussion;
             for (var idx = 0; idx < discussion.size(); idx++) {
@@ -271,7 +258,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
                         if (link.url.contains(path)) {
                             var segments = link.url.split(separator);
                             var id = segments[segments.length - 1];
-                            mapping.putIfAbsent(prefix + "." + id, disc.id);
+                            mapping.put(prefix + "." + id, disc.id);
                             break;
                         }
                     }
@@ -279,34 +266,6 @@ public class GitHubMigrationService extends AbstractMigrationService {
             }
         }
         return mapping;
-    }
-
-    private static Instant getLastEventTimestamp(Issue cachedIssue) {
-        Instant lastEventTimestamp = null;
-        if (cachedIssue != null) {
-            var discussion = cachedIssue.discussion;
-            var lastEvent = discussion.get(discussion.size() - 1);
-            lastEventTimestamp = lastEvent != null ?
-                    Instant.ofEpochSecond(Long.parseLong(lastEvent.timestamp)) : null;
-        }
-        return lastEventTimestamp;
-    }
-
-    private void updateComment(Session session, String id, String commentId, String body,
-                               List<Embed> embeds, Issue cached) throws Exception {
-        if (cached != null) {
-            //check the description has been changed to avoid unnecessary comment edits
-            for (var comment : cached.discussion) {
-                if (commentId.equals(comment.id)) {
-                    if (!comment.body.equalsIgnoreCase(body)) {
-                        logger.debug("Updating comment {}", commentId);
-                        radicle.updateIssue(session, id, new CommentEditAction(
-                                commentId, body, embeds));
-                    }
-                    break;
-                }
-            }
-        }
     }
 
     public network.radicle.tools.migrate.core.radicle.Issue toRadicle(GitHubIssue issue) {

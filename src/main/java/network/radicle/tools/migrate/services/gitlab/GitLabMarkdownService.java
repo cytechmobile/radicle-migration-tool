@@ -1,6 +1,8 @@
 package network.radicle.tools.migrate.services.gitlab;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import network.radicle.tools.migrate.Config;
 import network.radicle.tools.migrate.core.Timeline;
 import network.radicle.tools.migrate.core.gitlab.GitLabComment;
 import network.radicle.tools.migrate.core.gitlab.GitLabEvent;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GitLabMarkdownService extends MarkdownService {
+
+    @Inject Config config;
 
     public String getMetadata(GitLabEvent event) {
         var body = new ArrayList<String>();
@@ -60,6 +64,9 @@ public class GitLabMarkdownService extends MarkdownService {
         header.add("Created By");
 
         var rows = new ArrayList<String>();
+        var url = "https://" + config.gitlab().domain() + "/" + config.gitlab().namespace() +  "/" +
+                config.gitlab().project() + "/-/issues/" + comment.noteableIid + "#note_" + comment.id;
+        rows.add(this.link(String.valueOf(comment.id), url));
         rows.add(String.valueOf(comment.id));
         rows.add(this.escape(MarkdownService.DTF.format(comment.createdAt)));
         rows.add(this.link(comment.author.username, comment.author.webUrl));
