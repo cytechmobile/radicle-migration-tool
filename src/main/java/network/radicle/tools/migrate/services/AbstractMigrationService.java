@@ -9,8 +9,6 @@ import network.radicle.tools.migrate.core.radicle.Embed;
 import network.radicle.tools.migrate.core.radicle.Issue;
 import network.radicle.tools.migrate.core.radicle.Session;
 import network.radicle.tools.migrate.core.radicle.actions.CommentEditAction;
-import network.radicle.tools.migrate.services.AppStateService.Property;
-import network.radicle.tools.migrate.services.AppStateService.Service;
 import network.radicle.tools.migrate.services.github.GitHubMarkdownService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,20 +24,9 @@ import java.util.stream.Stream;
 public abstract class AbstractMigrationService {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMigrationService.class);
 
-    @Inject AppStateService appStateService;
     @Inject protected IRadicleClient radicle;
     @Inject protected Config config;
     @Inject protected GitHubMarkdownService markdownService;
-
-    public Instant getLastRun(Service service) {
-        var lastRun = appStateService.getProperty(service, Property.LAST_RUN);
-        return Strings.isNullOrEmpty(lastRun) ?
-            Instant.EPOCH : Instant.ofEpochMilli(Long.parseLong(lastRun));
-    }
-
-    public void setLastRun(Service service, Instant lastRun) {
-        appStateService.setProperty(service, Property.LAST_RUN, String.valueOf(lastRun.toEpochMilli()));
-    }
 
     protected String addEmbedsInline(List<MarkdownService.MarkdownLink> links, String body) {
         for (var link : links) {

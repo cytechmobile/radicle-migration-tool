@@ -13,7 +13,7 @@ public class Filters {
             order = 110,
             names = {"-fs", "--filter-since"},
             defaultValue = "${FILTER_SINCE}",
-            description = "Migrate issues created after the given time (default: timestamp of the last run, " +
+            description = "Migrate issues created after the given time (default: 1970-01-01T00:00:00Z, " +
                     "example: 2023-01-01T10:15:30+01:00).")
     public Instant fSince;
 

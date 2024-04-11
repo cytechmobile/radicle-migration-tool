@@ -36,7 +36,6 @@ import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_COMPLE
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_OPEN;
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_OTHER;
 import static network.radicle.tools.migrate.core.github.GitHubIssue.STATE_SOLVED;
-import static network.radicle.tools.migrate.services.AppStateService.Service.GITHUB;
 
 @ApplicationScoped
 public class GitHubMigrationService extends AbstractMigrationService {
@@ -57,7 +56,7 @@ public class GitHubMigrationService extends AbstractMigrationService {
         try {
             var filters = config.github().filters();
             if (filters.since() == null) {
-                filters = filters.withSince(getLastRun(GITHUB));
+                filters = filters.withSince(Instant.EPOCH);
             }
             logger.info("Migration started with filters: {}", filters);
 
@@ -159,7 +158,10 @@ public class GitHubMigrationService extends AbstractMigrationService {
                             }
                         } catch (Exception ex) {
                             partiallyOrNonMigratedIssues.add(issue.number);
-                            logger.warn("Failed to migrate issue: {}. Error: {}", issue.number, ex.getMessage());
+                            logger.warn("Failed to migrate issue: {}. Error: {}.", issue.number, ex.getMessage());
+                            if (ex.getMessage().contains("RESTEASY004655")) {
+                                logger.warn("The issue {} might contain a large image or file.", issue.number);
+                            }
                         }
                     }
                     logger.info("Processed issues: {}, comments: {}, events: {}, assets: {} ...",
@@ -175,9 +177,6 @@ public class GitHubMigrationService extends AbstractMigrationService {
                 }
             }
 
-            if (!config.radicle().dryRun()) {
-                setLastRun(GITHUB, Instant.now());
-            }
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
                 logger.warn("Partially or non migrated issues: {}", partiallyOrNonMigratedIssues);
             }

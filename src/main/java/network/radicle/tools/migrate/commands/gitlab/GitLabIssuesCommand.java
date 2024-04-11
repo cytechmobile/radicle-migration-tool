@@ -13,7 +13,6 @@ import network.radicle.tools.migrate.options.gitlab.GitLabApi;
 import network.radicle.tools.migrate.options.gitlab.GitLabRepo;
 import network.radicle.tools.migrate.options.radicle.RadicleApi;
 import network.radicle.tools.migrate.options.radicle.RadicleRepo;
-import network.radicle.tools.migrate.services.AppStateService;
 import network.radicle.tools.migrate.services.gitlab.GitLabMigrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +42,10 @@ public class GitLabIssuesCommand extends Command {
     @CommandLine.Mixin Generic generic;
     @CommandLine.Mixin Filters filters;
 
-    @Inject AppStateService appStateService;
     @Inject GitLabMigrationService service;
 
     @Override
     public void exec() {
-        if (!appStateService.isInitialized()) {
-            Quarkus.asyncExit(1);
-            return;
-        }
-
         var result = service.migrateIssues();
         if (!result) {
             logger.error("Migration failed.");

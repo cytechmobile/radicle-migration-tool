@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_OPEN;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_OPENED;
 import static network.radicle.tools.migrate.core.gitlab.GitLabIssue.STATE_SOLVED;
-import static network.radicle.tools.migrate.services.AppStateService.Service.GITLAB;
 
 @ApplicationScoped
 public class GitLabMigrationService extends AbstractMigrationService {
@@ -62,7 +61,7 @@ public class GitLabMigrationService extends AbstractMigrationService {
         try {
             var filters = config.gitlab().filters();
             if (filters.since() == null) {
-                filters = filters.withSince(getLastRun(GITLAB));
+                filters = filters.withSince(Instant.EPOCH);
             }
             logger.info("Migration started with filters: {}", filters);
 
@@ -175,10 +174,6 @@ public class GitLabMigrationService extends AbstractMigrationService {
                     logger.warn("Failed to migrate issues: {}. Error: {}", ids, ex.getMessage());
                     page++;
                 }
-            }
-
-            if (!config.radicle().dryRun()) {
-                setLastRun(GITLAB, Instant.now());
             }
 
             if (!partiallyOrNonMigratedIssues.isEmpty()) {
