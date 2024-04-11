@@ -59,7 +59,7 @@ For migrating issues from GitHub projects, some important features include:
 * It migrates essential information such as the `Title`, `Description`, `Status`, `Labels`, `Comments`, `Events`, and `Milestone` details.
 * It supports the migration of inline assets/files discovered within GitHub issues and comments as Radicle embeds. A GitHub `user_session` cookie must be provided when migrating assets/files from a private GitHub repository by using either the `--github-session` CLI parameter or the `GH_SESSION` environment variable. Login to GitHub via your browser and copy the value of the `user_session` cookie. 
 * Any additional information that doesn't fit within the Issue model is preserved in a dedicated `GitHub Metadata` section, along with references to the original repository
-* It supports incremental migration, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
+* It supports ongoing migration, allowing you to rerun the tool (e.g., on a schedule) and update existing issues while creating only the newest ones that haven't been previously migrated.
 * It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
 * It is available in different binary forms, providing flexibility in how it can be utilized.
 
@@ -73,7 +73,7 @@ For migrating issues from GitLab projects, some important features include:
 * It migrates essential information such as the `Title`, `Description`, `Status`, `Labels`, `Comments`, `Events`, and `Milestone` details.
 * It supports the migration of inline assets/files discovered within GitLab issues and comments as Radicle embeds. A GitLab `_gitlab_session` cookie must be provided when migrating assets/files from a private GitLab repository by using either the `--gitlab-session` CLI parameter or the `GL_SESSION` environment variable. Login to GitLab via your browser and copy the value of the `_gitlab_session` cookie.
 * Any additional information that doesn't fit within the Issue model is preserved in a dedicated `GitLab Metadata` section, along with references to the original repository
-* It supports incremental migration, allowing you to rerun the tool (e.g., on a schedule) and create only the newest issues that haven't been previously migrated.
+* It supports ongoing migration, allowing you to rerun the tool (e.g., on a schedule) and update existing issues while creating only the newest ones that haven't been previously migrated.
 * It offers a range of filtering options to streamline the issue migration process, including issues created after a specified time, issues with specific labels, issues in a particular state, issues belonging to a given milestone number, issues created by a specific user, and issues assigned to a particular user.
 
 ## Usage
@@ -98,7 +98,7 @@ Migrate issues from a GitHub repository to a Radicle project.
       -ru, --radicle-api-url=<rUrl>             The base url of Radicle HTTP API (default: http://localhost:8080/api).
       -rp, --radicle-project=<rProject>         The target Radicle project.
       -rh, --radicle-passphrase=<rPassphrase>   Your radicle passphrase.
-      -fs, --filter-since=<fSince>              Migrate issues created after the given time (default: lastRun in store.properties file, example: 2023-01-01T10:15:30+01:00).
+      -fs, --filter-since=<fSince>              Migrate issues created after the given time (default: 1970-01-01T00:00:00Z, example: 2023-01-01T10:15:30+01:00).
       -fl, --filter-labels=<fLabels>            Migrate issues with the given labels given in a csv format (example: bug,ui,@high).
       -ft, --filter-state=<fState>              Migrate issues in this state (default: all, can be one of: open, closed, all).
       -fm, --filter-milestone=<fMilestone>      Migrate issues belonging to the given milestone number (example: 3).
@@ -138,7 +138,7 @@ Migrate issues from a GitLab repository to a Radicle project.
       -ru, --radicle-api-url=<rUrl>         The base url of Radicle HTTP API (default: http://localhost:8080/api).
       -rp, --radicle-project=<rProject>     The target Radicle project.
       -rh, --radicle-passphrase             Your radicle passphrase.
-      -fs, --filter-since=<fSince>          Migrate issues created after the given time (default: timestamp of the last run, example: 2023-01-01T10:15:30+01:00).
+      -fs, --filter-since=<fSince>          Migrate issues created after the given time (default: 1970-01-01T00:00:00Z, example: 2023-01-01T10:15:30+01:00).
       -fl, --filter-labels=<fLabels>        Migrate issues with the given labels given in a csv format (example: bug,ui,@high).
       -ft, --filter-state=<fState>          Migrate issues in this state (default: all, can be one of: open, closed, all).
       -fm, --filter-milestone=<fMilestone>  Migrate issues belonging to the given milestone (example: 'Milestone 1')
@@ -195,7 +195,7 @@ You can pass any of the command line options via environment variables. Here is 
 * GL_SESSION: The value of the `_gitlab_session` cookie. It is utilized for migrating assets and files from a GitLab project with the `Require authentication to view media files` enabled
 
 #### Filtering
-* FILTER_SINCE: Migrate issues created after the given time (default: lastRun in store.properties file, example: 2023-01-01T10:15:30+01:00).
+* FILTER_SINCE: Migrate issues created after the given time (default: 1970-01-01T00:00:00Z, example: 2023-01-01T10:15:30+01:00).
 * FILTER_LABELS: Migrate issues with the given labels given in a csv format (example: bug,ui,@high).
 * FILTER_STATE: Migrate issues in this state (default: all, can be one of: open, closed, all).
 * FILTER_MILESTONE: Migrate issues belonging to the given milestone number (example: 3).
@@ -204,7 +204,6 @@ You can pass any of the command line options via environment variables. Here is 
 
 #### Other
 * LOG_LEVEL: The log level of the application (default INFO)
-* STORAGE_FILE_PATH: The path of the storage properties files (default store.properties)
 * DRY_RUN: Run the whole migration process without actually creating the issues in the target Radicle project.
 
 For example, to run the command in DEBUG mode, you can execute the following command:
@@ -237,15 +236,16 @@ docker pull ghcr.io/cytechmobile/radicle-migration-tool:latest
 docker tag ghcr.io/cytechmobile/radicle-migration-tool:latest radicle-migration-tool
 
 # Run the migration
-docker run -it -v .:/root/config -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-migration-tool issues
+docker run -it -v ~/.radicle:/root/.radicle -e RAD_PASSPHRASE=<YOUR_PASSPHRASE> radicle-migration-tool
 ```
 To ensure that the `docker run` command executes successfully, the following volumes are required:
-* `.:/root/config`: This allows the tool to write a `store.properties` file in your current directory, which helps maintain its state across subsequent runs. IMPORTANT: Please ensure that the folder from which you run the tool has the appropriate write permissions.
 * `~/.radicle:/root/.radicle`: This enables the tool to access your Radicle path. If the `rad path` command returns a different path, please update the volume accordingly.
 
-The image assumes that your local Radicle HTTP daemon (`rad web`) is accessible by default at `http://172.17.0.1:8080/api`, where `172.17.0.1` represents the IP address of the host from inside the Docker container. If you need to change this default configuration, you can utilize the available environment variables or CLI options provided.
+The image assumes that your local Radicle HTTP daemon is accessible by default at `http://172.17.0.1:8080/api`, where `172.17.0.1` represents the IP address of the host from inside the Docker container. If it is not accessible, you can either restart it using `rad web --listen 0.0.0.0:8080` or change this default configuration using the available environment variables or CLI options.
 
 Lastly, you have the option to pass any environment variable using the -e option of the docker run command. For example: `docker run -e LOG_LEVEL=DEBUG`.
+
+**Important Note:** The `github wiki` migration command is not currently available in the docker binary. Please use the JAR or native binaries for migrating a GitHub Wiki.
 
 ### Pre-built binaries
 Pre-built binaries can be downloaded from the project's GitHub [releases page](https://github.com/cytechmobile/radicle-migration-tool/releases). Choose the appropriate release for your operating system and download the associated JAR or executable file.
