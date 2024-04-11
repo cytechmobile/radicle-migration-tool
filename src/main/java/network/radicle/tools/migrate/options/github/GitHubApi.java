@@ -20,13 +20,6 @@ public class GitHubApi {
     public URL gUrl;
 
     @CommandLine.Option(
-            names = {"-gd", "--github-domain"},
-            order = 59,
-            defaultValue = "${GH_DOMAIN:-github.com}",
-            description = "The GitHub domain. It is utilized for migrating assets and files (default: github.com).")
-    public String gDomain;
-
-    @CommandLine.Option(
             names = {"-gs", "--github-session"},
             order = 60,
             defaultValue = "${GH_SESSION}",

@@ -27,4 +27,11 @@ public class GitHubRepo {
             defaultValue = "${GH_TOKEN}",
             description = "Your GitHub personal access token (with `repo` scope or `read-only access` granted).")
     public String gToken;
+
+    @CommandLine.Option(
+            names = {"-gd", "--github-domain"},
+            order = 59,
+            defaultValue = "${GH_DOMAIN:-github.com}",
+            description = "The GitHub domain. It is utilized for migrating assets and files (default: github.com).")
+    public String gDomain;
 }

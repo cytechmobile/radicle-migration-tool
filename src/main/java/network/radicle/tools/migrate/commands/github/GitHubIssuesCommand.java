@@ -64,7 +64,7 @@ public class GitHubIssuesCommand extends Command {
 
     @Override
     public Config getConfiguration() {
-        var ghConfig = new GitHubConfig(ghApi.gDomain, ghApi.gSession, ghRepo.gToken, ghApi.gUrl, ghApi.gVersion,
+        var ghConfig = new GitHubConfig(ghRepo.gDomain, ghApi.gSession, ghRepo.gToken, ghApi.gUrl, ghApi.gVersion,
                 ghRepo.gOwner, ghRepo.gRepo, filters.getFilters(), PAGE_SIZE);
         var radConfig = new RadicleConfig(radApi.rUrl, radApi.rVersion, radRepo.rProject, radRepo.rPassphrase, null,
                 generic.dryRun);

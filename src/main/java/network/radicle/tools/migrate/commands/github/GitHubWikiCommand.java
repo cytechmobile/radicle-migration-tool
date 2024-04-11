@@ -51,7 +51,7 @@ public class GitHubWikiCommand extends Command {
 
     @Override
     public Config getConfiguration() {
-        var ghConfig = new GitHubConfig(null, null, ghRepo.gToken, null, null, ghRepo.gOwner,
+        var ghConfig = new GitHubConfig(ghRepo.gDomain, null, ghRepo.gToken, null, null, ghRepo.gOwner,
                 ghRepo.gRepo, null, PAGE_SIZE);
         var radConfig = new RadicleConfig(null, null, null, null, rProjectPath, false);
 
