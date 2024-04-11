@@ -67,7 +67,6 @@ public class GitLabMarkdownService extends MarkdownService {
         var url = "https://" + config.gitlab().domain() + "/" + config.gitlab().namespace() +  "/" +
                 config.gitlab().project() + "/-/issues/" + comment.noteableIid + "#note_" + comment.id;
         rows.add(this.link(String.valueOf(comment.id), url));
-        rows.add(String.valueOf(comment.id));
         rows.add(this.escape(MarkdownService.DTF.format(comment.createdAt)));
         rows.add(this.link(comment.author.username, comment.author.webUrl));
 
